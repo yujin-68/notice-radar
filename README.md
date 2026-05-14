@@ -36,7 +36,8 @@
 
 ## 결과물 형태
 
-**CLI** — 터미널에서 실행하는 텍스트 기반 인터페이스
+- **CLI** — 터미널에서 실행하는 텍스트 기반 인터페이스
+- **Web** — 핵심 정보만 보여주는 심플한 웹페이지
 
 ---
 
@@ -46,3 +47,64 @@
 - 함수, 조건문, 반복문
 - 파일 입출력 (`open`, `read`, `write`)
 - 외부 라이브러리: `requests`, `BeautifulSoup`, `json`
+
+---
+
+## 현재 구현 (Python)
+
+- 엔트리 포인트: `main.py`
+- 핵심 로직: `notice_radar.py`
+- 설정 파일: `config.json`
+  - 기본 관심 키워드: `해외`, `학부연구생`
+  - 기본 소스 파일: `url.md` (여기 있는 URL 전체를 순회 수집)
+
+---
+
+## 실행 방법
+
+```bash
+pip install -r requirements.txt
+python main.py
+```
+
+실행 결과:
+
+- `data/latest.json`: 현재 실행 결과
+- `data/previous.json`: 이전 실행 결과 백업
+- `result.txt`: 터미널 확인용 텍스트 결과 (`NEW` 포함)
+
+### 웹페이지 실행
+
+```bash
+python web_app.py
+```
+
+브라우저에서 `http://127.0.0.1:5000` 접속  
+(`/?refresh=1`로 수동 새로고침 가능)
+
+웹페이지 표시 기준:
+
+- 제목 키워드 매칭 결과만 표시 (**OR 조건**: 키워드 중 하나라도 포함되면 매칭)
+- 날짜 기준 **최신순 정렬**
+- 새로 발견된 항목은 `NEW` 태그 표시
+
+---
+
+## 옵션
+
+```bash
+python main.py --keyword 해외 --keyword 학부연구생
+python main.py --source-url "https://home.knu.ac.kr/HOME/seeai/"
+python main.py --offline-html "IT대학-전자공학부-인공지능전공_files/index.html"
+```
+
+---
+
+## 하루 1회 자동 실행 (Windows 작업 스케줄러)
+
+1. 작업 스케줄러 → **기본 작업 만들기**
+2. 트리거: **매일**
+3. 동작: **프로그램 시작**
+4. 프로그램/스크립트: `python`
+5. 인수 추가: `main.py`
+6. 시작 위치: 프로젝트 루트 경로 (`C:\Project\notice-radar`)

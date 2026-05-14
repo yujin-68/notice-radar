@@ -1,0 +1,9 @@
+{
+  "sources_file": "url.md",
+  "keywords": [
+    "해외",
+    "학부연구생"
+  ],
+  "limit": 30,
+  "storage_dir": "data"
+}
