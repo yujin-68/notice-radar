@@ -12,25 +12,31 @@ from urllib.parse import urljoin
 import requests
 from bs4 import BeautifulSoup
 
+# 공지 블록 텍스트에서 날짜를 찾기 위한 정규식 패턴
 DATE_PATTERN = re.compile(r"(20\d{2}[./-]\d{1,2}[./-]\d{1,2})")
+# 공지 상세 페이지 링크로 판단할 때 사용하는 href 단서들
 NOTICE_HREF_PATTERNS = ("mode=view", "viewBtin.action", "pg=vv")
 
 
+# JSON 파일을 읽어 dict로 반환 (없으면 None)
 def load_json(path: Path) -> dict[str, Any] | None:
     if not path.exists():
         return None
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+# JSON 파일 저장 (폴더가 없으면 생성)
 def save_json(path: Path, data: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+# 공백 정규화: 여러 공백/개행을 하나의 공백으로 합침
 def normalize_text(text: str) -> str:
     return " ".join(text.split())
 
 
+# 링크 앵커 주변 블록에서 날짜 패턴을 찾아 반환
 def extract_date(anchor) -> str:
     for parent in anchor.parents:
         if parent.name in {"li", "tr", "div", "article", "section"}:
@@ -41,6 +47,7 @@ def extract_date(anchor) -> str:
     return ""
 
 
+# HTML에서 공지 링크/제목/날짜/출처를 추출
 def parse_notices(html: str, base_url: str, source_name: str) -> list[dict[str, Any]]:
     soup = BeautifulSoup(html, "html.parser")
     notices: list[dict[str, Any]] = []
@@ -75,6 +82,7 @@ def parse_notices(html: str, base_url: str, source_name: str) -> list[dict[str, 
     return notices
 
 
+# 문자열 날짜를 datetime으로 변환 (파싱 실패 시 None)
 def parse_notice_date(date_text: str) -> datetime | None:
     if not date_text:
         return None
@@ -89,6 +97,7 @@ def parse_notice_date(date_text: str) -> datetime | None:
         return None
 
 
+# 공지 목록을 날짜 기준 최신순 정렬
 def sort_notices_latest(notices: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return sorted(
         notices,
@@ -97,6 +106,7 @@ def sort_notices_latest(notices: list[dict[str, Any]]) -> list[dict[str, Any]]:
     )
 
 
+# 제목에 키워드가 포함된 공지를 필터링하고 매칭 키워드 기록
 def filter_notices_by_title(notices: list[dict[str, Any]], keywords: list[str]) -> list[dict[str, Any]]:
     cleaned_keywords = [k.strip() for k in keywords if k.strip()]
     if not cleaned_keywords:
@@ -114,6 +124,7 @@ def filter_notices_by_title(notices: list[dict[str, Any]], keywords: list[str]) 
     return filtered
 
 
+# 결과를 사람이 읽기 쉬운 텍스트 파일로 저장
 def write_result_text(path: Path, filtered: list[dict[str, Any]]) -> None:
     lines: list[str] = []
     if not filtered:
@@ -132,6 +143,7 @@ def write_result_text(path: Path, filtered: list[dict[str, Any]]) -> None:
     path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
 
 
+# 공지 HTML을 가져오되 frameset 하위 frame도 처리
 def fetch_html(source_url: str, timeout: int = 20) -> str:
     candidates = [source_url]
     if source_url.endswith("/"):
@@ -171,6 +183,7 @@ def fetch_html(source_url: str, timeout: int = 20) -> str:
     raise RuntimeError("HTML을 가져오지 못했습니다.")
 
 
+# 마크다운 목록에서 소스 이름/URL 추출 (예: url.md)
 def parse_sources_from_markdown(path: Path) -> list[dict[str, str]]:
     if not path.exists():
         return []
@@ -199,6 +212,7 @@ def parse_sources_from_markdown(path: Path) -> list[dict[str, str]]:
     return sources
 
 
+# CLI 인자 파싱
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="KNU Notice Radar")
     parser.add_argument("--config", default="config.json", help="설정 파일 경로")
@@ -209,6 +223,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+# 공지 수집→필터링→저장까지의 전체 파이프라인
 def collect_and_save(
     config_path: Path = Path("config.json"),
     source_url_override: str | None = None,
@@ -289,6 +304,7 @@ def collect_and_save(
     }
 
 
+# 엔트리포인트: 인자 처리 후 수집 실행 및 요약 출력
 def main() -> None:
     args = parse_args()
     data = collect_and_save(

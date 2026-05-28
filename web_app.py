@@ -8,6 +8,7 @@ from wsgiref.simple_server import make_server
 from notice_radar import collect_and_save, load_json
 
 
+# 결과 데이터를 받아 HTML 페이지로 렌더링
 def render_page(data: dict) -> str:
     keywords = ", ".join(data.get("keywords", [])) if data.get("keywords") else "없음"
     rows = []
@@ -65,6 +66,7 @@ def render_page(data: dict) -> str:
 """
 
 
+# 최신 데이터가 없거나 새로고침 요청 시 수집 실행
 def get_data(refresh: bool) -> dict:
     latest_path = Path("data") / "latest.json"
     if refresh or not latest_path.exists():
@@ -75,6 +77,7 @@ def get_data(refresh: bool) -> dict:
     return data
 
 
+# WSGI 엔트리: 라우팅/쿼리 처리 후 HTML 응답 생성
 def app(environ, start_response):
     parsed = urlparse(environ.get("PATH_INFO", "/") + ("?" + environ.get("QUERY_STRING", "") if environ.get("QUERY_STRING") else ""))
     if parsed.path != "/":
@@ -90,6 +93,7 @@ def app(environ, start_response):
 
 
 if __name__ == "__main__":
+    # 로컬 개발용 간단 서버 실행
     with make_server("127.0.0.1", 5000, app) as server:
         print("Web UI: http://127.0.0.1:5000")
         server.serve_forever()
