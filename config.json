@@ -1,9 +1,14 @@
 {
+  "_comment": "KNU Notice Radar 기본 설정값",
+  "_comment_sources_file": "소스 목록이 적힌 마크다운 파일 경로 (예: url.md)",
   "sources_file": "url.md",
+  "_comment_keywords": "관심 키워드 목록 (제목에 포함되면 매칭됨)",
   "keywords": [
     "해외",
     "학부연구생"
   ],
+  "_comment_limit": "최대 수집 건수",
   "limit": 30,
+  "_comment_storage_dir": "결과 저장 폴더 (latest.json, previous.json 저장)",
   "storage_dir": "data"
 }
