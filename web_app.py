@@ -1,17 +1,23 @@
 from __future__ import annotations
 
 from html import escape
-from pathlib import Path
 from urllib.parse import parse_qs, urlencode, urlparse
 from wsgiref.simple_server import make_server
 
-from notice_radar import collect_and_save, filter_notices_by_criteria, load_json
+from notice_radar import (
+    DEFAULT_CONFIG_PATH,
+    collect_and_save,
+    filter_notices_by_criteria,
+    load_config,
+    load_json,
+)
 
 
 # 결과 데이터를 받아 HTML 페이지로 렌더링
 def render_page(data: dict) -> str:
     keywords = ", ".join(data.get("keywords", [])) if data.get("keywords") else "없음"
     applied_filters = data.get("applied_filters", {})
+    fetch_errors = data.get("fetch_errors", [])
     filter_summary = []
     if applied_filters.get("source_filters"):
         filter_summary.append(f"출처: {', '.join(applied_filters['source_filters'])}")
@@ -77,6 +83,7 @@ def render_page(data: dict) -> str:
     th {{ background: #f5f5f5; }}
     .tag {{ display: inline-block; background: #ffe08a; color: #5c4600; border-radius: 999px; padding: 2px 8px; font-size: 12px; margin-left: 6px; }}
     .excerpt {{ color: #666; font-size: 12px; margin-top: 6px; line-height: 1.4; }}
+    .warning {{ margin: 12px 0; padding: 10px 12px; border-radius: 6px; background: #fff3cd; color: #6b5300; }}
     .empty {{ margin-top: 20px; color: #666; }}
   </style>
 </head>
@@ -87,6 +94,7 @@ def render_page(data: dict) -> str:
     키워드: {escape(keywords)}<br />
     필터: {escape(filter_text)}
   </div>
+  {"<div class='warning'>수집 경고: " + escape("; ".join(fetch_errors)) + "</div>" if fetch_errors else ""}
   <a class="btn" href="{refresh_url}">새로고침</a>
   {table_html}
 </body>
@@ -96,18 +104,19 @@ def render_page(data: dict) -> str:
 
 # 최신 데이터가 없거나 새로고침 요청 시 수집 실행
 def get_data(refresh: bool, filters: dict[str, list[str] | str | bool]) -> dict:
-    latest_path = Path("data") / "latest.json"
+    config = load_config(
+        DEFAULT_CONFIG_PATH,
+        source_filters_override=filters.get("source") if isinstance(filters.get("source"), list) else None,
+        after_date_override=filters.get("after") if isinstance(filters.get("after"), str) else None,
+        before_date_override=filters.get("before") if isinstance(filters.get("before"), str) else None,
+        new_only_override=bool(filters.get("new_only", False)),
+    )
+    latest_path = config.storage_dir / "latest.json"
     if refresh or not latest_path.exists():
-        return collect_and_save(
-            config_path=Path("config.json"),
-            source_filters_override=filters.get("source") if isinstance(filters.get("source"), list) else None,
-            after_date_override=filters.get("after") if isinstance(filters.get("after"), str) else None,
-            before_date_override=filters.get("before") if isinstance(filters.get("before"), str) else None,
-            new_only_override=bool(filters.get("new_only", False)),
-        )
+        return collect_and_save(config=config)
     data = load_json(latest_path)
     if data is None:
-        return collect_and_save(config_path=Path("config.json"))
+        return collect_and_save(config=config)
 
     source_filters = filters.get("source") if isinstance(filters.get("source"), list) else []
     after = filters.get("after") if isinstance(filters.get("after"), str) else None
@@ -133,6 +142,7 @@ def get_data(refresh: bool, filters: dict[str, list[str] | str | bool]) -> dict:
             "before_date": before,
             "new_only": new_only,
         }
+        derived["fetch_errors"] = data.get("fetch_errors", [])
         return derived
 
     return data

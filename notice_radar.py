@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import re
+from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -12,20 +13,52 @@ from urllib.parse import urljoin
 import requests
 from bs4 import BeautifulSoup
 
-# 공지 블록 텍스트에서 날짜를 찾기 위한 정규식 패턴
+DEFAULT_CONFIG_PATH = Path("config.json")
+DEFAULT_STORAGE_DIR = Path("data")
+DEFAULT_SOURCES_FILE = Path("url.md")
+DEFAULT_RESULT_PATH = Path("result.txt")
+DEFAULT_TIMEOUT = 20
+DEFAULT_LIMIT = 30
+DEFAULT_SOURCE_URL = "https://home.knu.ac.kr/HOME/seeai/"
+DEFAULT_HTML_TAGS = {"li", "tr", "div", "article", "section"}
+
 DATE_PATTERN = re.compile(r"(20\d{2}[./-]\d{1,2}[./-]\d{1,2})")
-# 공지 상세 페이지 링크로 판단할 때 사용하는 href 단서들
 NOTICE_HREF_PATTERNS = ("mode=view", "viewBtin.action", "pg=vv")
 
 
-# JSON 파일을 읽어 dict로 반환 (없으면 None)
+@dataclass(frozen=True)
+class AppConfig:
+    config_path: Path = DEFAULT_CONFIG_PATH
+    storage_dir: Path = DEFAULT_STORAGE_DIR
+    sources_file: Path = DEFAULT_SOURCES_FILE
+    result_path: Path = DEFAULT_RESULT_PATH
+    keywords: list[str] = field(default_factory=list)
+    source_url: str | None = None
+    source_url_override: str | None = None
+    sources: list[dict[str, str]] = field(default_factory=list)
+    source_filters: list[str] = field(default_factory=list)
+    after_date: str | None = None
+    before_date: str | None = None
+    new_only: bool = False
+    limit: int = DEFAULT_LIMIT
+    timeout: int = DEFAULT_TIMEOUT
+    offline_html_path: str | None = None
+
+
+@dataclass(frozen=True)
+class ResultPaths:
+    latest: Path
+    previous: Path
+    history: Path
+    result: Path
+
+
 def load_json(path: Path) -> dict[str, Any] | None:
     if not path.exists():
         return None
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-# JSON 파일 저장 (폴더가 없으면 생성)
 def save_json(path: Path, data: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -37,15 +70,13 @@ def append_jsonl(path: Path, data: dict[str, Any]) -> None:
         file.write(json.dumps(data, ensure_ascii=False) + "\n")
 
 
-# 공백 정규화: 여러 공백/개행을 하나의 공백으로 합침
 def normalize_text(text: str) -> str:
     return " ".join(text.split())
 
 
-# 링크 앵커 주변 블록에서 날짜 패턴을 찾아 반환
 def extract_date(anchor) -> str:
     for parent in anchor.parents:
-        if parent.name in {"li", "tr", "div", "article", "section"}:
+        if parent.name in DEFAULT_HTML_TAGS:
             block_text = normalize_text(parent.get_text(" ", strip=True))
             match = DATE_PATTERN.search(block_text)
             if match:
@@ -55,14 +86,13 @@ def extract_date(anchor) -> str:
 
 def extract_context(anchor) -> str:
     for parent in anchor.parents:
-        if parent.name in {"li", "tr", "div", "article", "section"}:
+        if parent.name in DEFAULT_HTML_TAGS:
             block_text = normalize_text(parent.get_text(" ", strip=True))
             if block_text:
                 return block_text[:500]
     return ""
 
 
-# HTML에서 공지 링크/제목/날짜/출처를 추출
 def parse_notices(html: str, base_url: str, source_name: str) -> list[dict[str, Any]]:
     soup = BeautifulSoup(html, "html.parser")
     notices: list[dict[str, Any]] = []
@@ -84,7 +114,6 @@ def parse_notices(html: str, base_url: str, source_name: str) -> list[dict[str, 
             continue
 
         seen_urls.add(absolute_url)
-        context = extract_context(anchor)
         notices.append(
             {
                 "id": hashlib.sha1(absolute_url.encode("utf-8")).hexdigest()[:16],
@@ -92,14 +121,13 @@ def parse_notices(html: str, base_url: str, source_name: str) -> list[dict[str, 
                 "url": absolute_url,
                 "date": extract_date(anchor),
                 "source": source_name,
-                "context": context,
+                "context": extract_context(anchor),
             }
         )
 
     return notices
 
 
-# 문자열 날짜를 datetime으로 변환 (파싱 실패 시 None)
 def parse_notice_date(date_text: str) -> datetime | None:
     if not date_text:
         return None
@@ -108,40 +136,10 @@ def parse_notice_date(date_text: str) -> datetime | None:
     if len(parts) != 3:
         return None
     try:
-        year, month, day = (int(p) for p in parts)
+        year, month, day = (int(part) for part in parts)
         return datetime(year, month, day)
     except ValueError:
         return None
-
-
-def build_notice_search_text(notice: dict[str, Any]) -> str:
-    return normalize_text(" ".join(part for part in [str(notice.get("title", "")), str(notice.get("context", ""))] if part)).casefold()
-
-
-# 공지 목록을 날짜 기준 최신순 정렬
-def sort_notices_latest(notices: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    return sorted(
-        notices,
-        key=lambda item: parse_notice_date(str(item.get("date", ""))) or datetime.min,
-        reverse=True,
-    )
-
-
-def filter_notices_by_keywords(notices: list[dict[str, Any]], keywords: list[str]) -> list[dict[str, Any]]:
-    cleaned_keywords = [k.strip() for k in keywords if k.strip()]
-    if not cleaned_keywords:
-        return [dict(notice, matched_keywords=[]) for notice in notices]
-
-    filtered: list[dict[str, Any]] = []
-    for notice in notices:
-        search_text = build_notice_search_text(notice)
-        matched = [k for k in cleaned_keywords if k.casefold() in search_text]
-        if matched:
-            entry = dict(notice)
-            entry["matched_keywords"] = matched
-            filtered.append(entry)
-
-    return filtered
 
 
 def parse_notice_filter_date(date_text: str | None) -> datetime | None:
@@ -154,6 +152,43 @@ def parse_notice_filter_date(date_text: str | None) -> datetime | None:
         return datetime.fromisoformat(date_text)
     except ValueError:
         return None
+
+
+def build_notice_search_text(notice: dict[str, Any]) -> str:
+    return normalize_text(
+        " ".join(part for part in [str(notice.get("title", "")), str(notice.get("context", ""))] if part)
+    ).casefold()
+
+
+def sort_notices_latest(notices: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return sorted(
+        notices,
+        key=lambda item: parse_notice_date(str(item.get("date", ""))) or datetime.min,
+        reverse=True,
+    )
+
+
+def dedupe_notices(notices: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    dedup: dict[str, dict[str, Any]] = {}
+    for notice in notices:
+        dedup[notice["url"]] = notice
+    return list(dedup.values())
+
+
+def filter_notices_by_keywords(notices: list[dict[str, Any]], keywords: list[str]) -> list[dict[str, Any]]:
+    cleaned_keywords = [keyword.strip() for keyword in keywords if keyword.strip()]
+    if not cleaned_keywords:
+        return [dict(notice, matched_keywords=[]) for notice in notices]
+
+    filtered: list[dict[str, Any]] = []
+    for notice in notices:
+        search_text = build_notice_search_text(notice)
+        matched = [keyword for keyword in cleaned_keywords if keyword.casefold() in search_text]
+        if matched:
+            entry = dict(notice)
+            entry["matched_keywords"] = matched
+            filtered.append(entry)
+    return filtered
 
 
 def filter_notices_by_criteria(
@@ -189,9 +224,14 @@ def filter_notices_by_criteria(
     return result
 
 
-# 결과를 사람이 읽기 쉬운 텍스트 파일로 저장
-def write_result_text(path: Path, filtered: list[dict[str, Any]]) -> None:
+def write_result_text(path: Path, filtered: list[dict[str, Any]], fetch_errors: list[str] | None = None) -> None:
     lines: list[str] = []
+    if fetch_errors:
+        lines.append("수집 경고:")
+        for error in fetch_errors:
+            lines.append(f"- {error}")
+        lines.append("")
+
     if not filtered:
         lines.append("매칭된 공지사항이 없습니다.")
     else:
@@ -211,8 +251,7 @@ def write_result_text(path: Path, filtered: list[dict[str, Any]]) -> None:
     path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
 
 
-# 공지 HTML을 가져오되 frameset 하위 frame도 처리
-def fetch_html(source_url: str, timeout: int = 20) -> str:
+def fetch_html(source_url: str, timeout: int = DEFAULT_TIMEOUT) -> str:
     candidates = [source_url]
     if source_url.endswith("/"):
         candidates.append(source_url.rstrip("/") + "/index.htm")
@@ -225,6 +264,7 @@ def fetch_html(source_url: str, timeout: int = 20) -> str:
         "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8",
         "Referer": "https://seeai.knu.ac.kr/",
     }
+
     for candidate in candidates:
         try:
             response = requests.get(candidate, timeout=timeout, headers=headers)
@@ -232,7 +272,6 @@ def fetch_html(source_url: str, timeout: int = 20) -> str:
             response.encoding = response.apparent_encoding
             html = response.text
 
-            # 일부 KNU 사이트는 frameset 구조이며 실제 내용은 bottom frame에 있음
             soup = BeautifulSoup(html, "html.parser")
             frame = soup.find("frame", attrs={"name": "bottom"}) or soup.find("frame")
             frame_src = frame.get("src") if frame else None
@@ -251,7 +290,6 @@ def fetch_html(source_url: str, timeout: int = 20) -> str:
     raise RuntimeError("HTML을 가져오지 못했습니다.")
 
 
-# 마크다운 목록에서 소스 이름/URL 추출 (예: url.md)
 def parse_sources_from_markdown(path: Path) -> list[dict[str, str]]:
     if not path.exists():
         return []
@@ -280,10 +318,9 @@ def parse_sources_from_markdown(path: Path) -> list[dict[str, str]]:
     return sources
 
 
-# CLI 인자 파싱
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="KNU Notice Radar")
-    parser.add_argument("--config", default="config.json", help="설정 파일 경로")
+    parser.add_argument("--config", default=str(DEFAULT_CONFIG_PATH), help="설정 파일 경로")
     parser.add_argument("--source-url", help="공지 수집 URL (설정 덮어쓰기)")
     parser.add_argument("--keyword", action="append", default=None, help="관심 키워드(여러 번 사용 가능)")
     parser.add_argument("--source", action="append", default=None, help="출처 필터(여러 번 사용 가능)")
@@ -295,9 +332,9 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-# 공지 수집→필터링→저장까지의 전체 파이프라인
-def collect_and_save(
-    config_path: Path = Path("config.json"),
+def load_config(
+    config_path: Path = DEFAULT_CONFIG_PATH,
+    *,
     source_url_override: str | None = None,
     keywords_override: list[str] | None = None,
     source_filters_override: list[str] | None = None,
@@ -306,117 +343,186 @@ def collect_and_save(
     new_only_override: bool = False,
     limit_override: int | None = None,
     offline_html_path: str | None = None,
-) -> dict[str, Any]:
-    config = load_json(config_path) or {}
-    keywords = keywords_override if keywords_override is not None else config.get("keywords", [])
-    limit = limit_override if limit_override is not None else int(config.get("limit", 30))
-    storage_dir = Path(config.get("storage_dir", "data"))
-    sources_file = Path(config.get("sources_file", "url.md"))
-    latest_path = storage_dir / "latest.json"
-    previous_path = storage_dir / "previous.json"
-    history_path = storage_dir / "history.jsonl"
-    result_path = Path("result.txt")
+) -> AppConfig:
+    config_data = load_json(config_path) or {}
+    storage_dir = Path(config_data.get("storage_dir", DEFAULT_STORAGE_DIR))
+    sources_file = Path(config_data.get("sources_file", DEFAULT_SOURCES_FILE))
+    keywords = keywords_override if keywords_override is not None else list(config_data.get("keywords", []))
+    limit = limit_override if limit_override is not None else int(config_data.get("limit", DEFAULT_LIMIT))
+    source_url = config_data.get("source_url")
+    sources = config_data.get("sources") or []
 
-    if source_url_override:
-        sources = [{"name": "사용자 지정 소스", "url": source_url_override}]
-    else:
-        sources = config.get("sources") or parse_sources_from_markdown(sources_file)
-        if not sources:
-            fallback_url = config.get("source_url") or "https://home.knu.ac.kr/HOME/seeai/"
-            sources = [{"name": "기본 소스", "url": fallback_url}]
-
-    if offline_html_path:
-        # 오프라인 테스트 모드에서는 단일 소스로 처리
-        html = Path(offline_html_path).read_text(encoding="utf-8")
-        base_url = sources[0]["url"]
-        notices = parse_notices(html, base_url, sources[0]["name"])
-    else:
-        notices = []
-        for source in sources:
-            html = fetch_html(source["url"])
-            notices.extend(parse_notices(html, source["url"], source["name"]))
-
-    # 전체 소스 기준 URL 중복 제거
-    dedup: dict[str, dict[str, Any]] = {}
-    for notice in notices:
-        dedup[notice["url"]] = notice
-    notices = list(dedup.values())
-    notices = sort_notices_latest(notices)
-    notices = notices[: max(limit, 0)]
-
-    previous_data = load_json(latest_path)
-    previous_ids = set()
-    if previous_data:
-        previous_source = previous_data.get("all_notices") or previous_data.get("notices", [])
-        previous_ids = {item["id"] for item in previous_source}
-        save_json(previous_path, previous_data)
-
-    for item in notices:
-        item["is_new"] = item["id"] not in previous_ids
-
-    filtered = filter_notices_by_criteria(
-        notices,
-        keywords,
-        source_filters=source_filters_override,
+    return AppConfig(
+        config_path=config_path,
+        storage_dir=storage_dir,
+        sources_file=sources_file,
+        result_path=DEFAULT_RESULT_PATH,
+        keywords=keywords,
+        source_url=source_url,
+        source_url_override=source_url_override,
+        sources=sources,
+        source_filters=source_filters_override or [],
         after_date=after_date_override,
         before_date=before_date_override,
         new_only=new_only_override,
+        limit=limit,
+        timeout=int(config_data.get("timeout", DEFAULT_TIMEOUT)),
+        offline_html_path=offline_html_path,
     )
-    filtered = sort_notices_latest(filtered)
 
-    now = datetime.now().isoformat(timespec="seconds")
-    applied_filters = {
-        "source_filters": source_filters_override or [],
-        "after_date": after_date_override,
-        "before_date": before_date_override,
-        "new_only": new_only_override,
+
+def resolve_sources(config: AppConfig) -> list[dict[str, str]]:
+    if config.source_url_override:
+        return [{"name": "사용자 지정 소스", "url": config.source_url_override}]
+
+    if config.sources:
+        return list(config.sources)
+
+    parsed_sources = parse_sources_from_markdown(config.sources_file)
+    if parsed_sources:
+        return parsed_sources
+
+    fallback_url = config.source_url or DEFAULT_SOURCE_URL
+    return [{"name": "기본 소스", "url": fallback_url}]
+
+
+def fetch_all_notices(config: AppConfig, sources: list[dict[str, str]]) -> tuple[list[dict[str, Any]], list[str]]:
+    if config.offline_html_path:
+        html = Path(config.offline_html_path).read_text(encoding="utf-8")
+        base_url = sources[0]["url"]
+        return parse_notices(html, base_url, sources[0]["name"]), []
+
+    notices: list[dict[str, Any]] = []
+    errors: list[str] = []
+    for source in sources:
+        try:
+            html = fetch_html(source["url"], timeout=config.timeout)
+            notices.extend(parse_notices(html, source["url"], source["name"]))
+        except requests.RequestException as error:
+            errors.append(f"{source['name']}: {error}")
+
+    return notices, errors
+
+
+def process_notices(
+    notices: list[dict[str, Any]],
+    previous_ids: set[str],
+    config: AppConfig,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    ordered = sort_notices_latest(dedupe_notices(notices))
+    ordered = ordered[: max(config.limit, 0)]
+
+    for item in ordered:
+        item["is_new"] = item["id"] not in previous_ids
+
+    filtered = filter_notices_by_criteria(
+        ordered,
+        config.keywords,
+        source_filters=config.source_filters,
+        after_date=config.after_date,
+        before_date=config.before_date,
+        new_only=config.new_only,
+    )
+    return ordered, sort_notices_latest(filtered)
+
+
+def build_previous_ids(previous_data: dict[str, Any] | None) -> set[str]:
+    if not previous_data:
+        return set()
+    previous_source = previous_data.get("all_notices") or previous_data.get("notices", [])
+    return {item["id"] for item in previous_source}
+
+
+def build_applied_filters(config: AppConfig) -> dict[str, Any]:
+    return {
+        "source_filters": config.source_filters,
+        "after_date": config.after_date,
+        "before_date": config.before_date,
+        "new_only": config.new_only,
     }
+
+
+def save_all_results(
+    paths: ResultPaths,
+    summary: dict[str, Any],
+    fetch_errors: list[str],
+) -> None:
     save_json(
-        latest_path,
+        paths.latest,
         {
-            "updated_at": now,
-            "sources": sources,
-            "keywords": keywords,
-            "applied_filters": applied_filters,
-            "total_notices": len(notices),
-            "matched_notices": len(filtered),
-            "all_notices": notices,
-            "notices": filtered,
+            "updated_at": summary["updated_at"],
+            "sources": summary["sources"],
+            "keywords": summary["keywords"],
+            "applied_filters": summary["applied_filters"],
+            "total_notices": summary["total_notices"],
+            "matched_notices": summary["matched_notices"],
+            "fetch_errors": fetch_errors,
+            "all_notices": summary["all_notices"],
+            "notices": summary["notices"],
         },
     )
     append_jsonl(
-        history_path,
+        paths.history,
         {
-            "updated_at": now,
-            "sources": sources,
-            "keywords": keywords,
-            "applied_filters": applied_filters,
-            "total_notices": len(notices),
-            "matched_notices": len(filtered),
+            "updated_at": summary["updated_at"],
+            "sources": summary["sources"],
+            "keywords": summary["keywords"],
+            "applied_filters": summary["applied_filters"],
+            "total_notices": summary["total_notices"],
+            "matched_notices": summary["matched_notices"],
+            "fetch_errors": fetch_errors,
         },
     )
-    write_result_text(result_path, filtered)
+    write_result_text(paths.result, summary["notices"], fetch_errors)
 
-    return {
+
+def collect_and_save(config: AppConfig | None = None, **overrides: Any) -> dict[str, Any]:
+    runtime_config = config or load_config(**overrides)
+    if config is not None and overrides:
+        raise ValueError("config가 주어졌다면 추가 overrides를 함께 전달할 수 없습니다.")
+
+    paths = ResultPaths(
+        latest=runtime_config.storage_dir / "latest.json",
+        previous=runtime_config.storage_dir / "previous.json",
+        history=runtime_config.storage_dir / "history.jsonl",
+        result=runtime_config.result_path,
+    )
+
+    sources = resolve_sources(runtime_config)
+    notices, fetch_errors = fetch_all_notices(runtime_config, sources)
+    previous_data = load_json(paths.latest)
+    previous_ids = build_previous_ids(previous_data)
+
+    all_notices, filtered = process_notices(notices, previous_ids, runtime_config)
+    previous_snapshot = previous_data
+    if previous_snapshot:
+        save_json(paths.previous, previous_snapshot)
+
+    now = datetime.now().isoformat(timespec="seconds")
+    summary = {
         "updated_at": now,
         "sources": sources,
-        "keywords": keywords,
-        "applied_filters": applied_filters,
-        "total_notices": len(notices),
+        "keywords": runtime_config.keywords,
+        "applied_filters": build_applied_filters(runtime_config),
+        "total_notices": len(all_notices),
         "matched_notices": len(filtered),
+        "all_notices": all_notices,
         "notices": filtered,
-        "all_notices": notices,
-        "latest_path": str(latest_path),
-        "result_path": str(result_path),
-        "history_path": str(history_path),
+        "fetch_errors": fetch_errors,
+        "latest_path": str(paths.latest),
+        "previous_path": str(paths.previous),
+        "result_path": str(paths.result),
+        "history_path": str(paths.history),
     }
 
+    save_all_results(paths, summary, fetch_errors)
+    return summary
 
-# 엔트리포인트: 인자 처리 후 수집 실행 및 요약 출력
+
 def main() -> None:
     args = parse_args()
-    data = collect_and_save(
-        config_path=Path(args.config),
+    config = load_config(
+        Path(args.config),
         source_url_override=args.source_url,
         keywords_override=args.keyword,
         source_filters_override=args.source,
@@ -426,11 +532,14 @@ def main() -> None:
         limit_override=args.limit,
         offline_html_path=args.offline_html,
     )
+    data = collect_and_save(config=config)
 
     print(f"수집: {data['total_notices']}건 / 키워드 매칭: {data['matched_notices']}건")
     print(f"- JSON: {data['latest_path']}")
     print(f"- TEXT: {data['result_path']}")
     print(f"- HISTORY: {data['history_path']}")
+    if data.get("fetch_errors"):
+        print(f"- WARN: {len(data['fetch_errors'])}개 소스 수집 실패")
 
 
 if __name__ == "__main__":
