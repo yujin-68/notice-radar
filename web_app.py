@@ -1,71 +1,109 @@
 from __future__ import annotations
 
 from html import escape
+from pathlib import Path
 from urllib.parse import parse_qs, urlencode, urlparse
 from wsgiref.simple_server import make_server
 
-from notice_radar import (
-    DEFAULT_CONFIG_PATH,
-    collect_and_save,
-    filter_notices_by_criteria,
-    load_config,
-    load_json,
-)
+from notice_radar import DEFAULT_CONFIG_PATH, collect_and_save, load_json
 
 
-# 결과 데이터를 받아 HTML 페이지로 렌더링
+def build_config(filters: dict[str, list[str] | str | bool]) -> dict:
+    base = load_json(DEFAULT_CONFIG_PATH) or {}
+    storage_dir = base.get("storage_dir", "data")
+    return {
+        "keywords": list(base.get("keywords", [])),
+        "source_filters": filters.get("source", []) if isinstance(filters.get("source"), list) else [],
+        "after": filters.get("after") if isinstance(filters.get("after"), str) else None,
+        "before": filters.get("before") if isinstance(filters.get("before"), str) else None,
+        "new_only": bool(filters.get("new_only", False)),
+        "limit": int(base.get("limit", 30)),
+        "storage_dir": Path(storage_dir),
+        "result_path": Path(base.get("result_path", "result.txt")),
+        "timeout": int(base.get("timeout", 20)),
+        "sources": base.get("sources") or ([{"name": "기본 소스", "url": base.get("source_url", "https://home.knu.ac.kr/HOME/seeai/")}]),
+    }
+
+
+def apply_filters(data: dict, filters: dict[str, list[str] | str | bool]) -> dict:
+    source_filters = filters.get("source") if isinstance(filters.get("source"), list) else []
+    after = filters.get("after") if isinstance(filters.get("after"), str) else None
+    before = filters.get("before") if isinstance(filters.get("before"), str) else None
+    new_only = bool(filters.get("new_only", False))
+
+    if not (source_filters or after or before or new_only):
+        return data
+
+    filtered = []
+    for notice in data.get("all_notices", data.get("notices", [])):
+        text = f"{notice.get('title', '')} {notice.get('context', '')}".casefold()
+        if data.get("keywords") and not any(keyword.casefold() in text for keyword in data["keywords"] if keyword.strip()):
+            continue
+        if source_filters:
+            source_text = f"{notice.get('source', '')} {notice.get('url', '')}".casefold()
+            if not any(term.casefold() in source_text for term in source_filters if term.strip()):
+                continue
+        if after and notice.get("date") and notice["date"] < after:
+            continue
+        if before and notice.get("date") and notice["date"] > before:
+            continue
+        if new_only and not notice.get("is_new"):
+            continue
+        filtered.append(notice)
+
+    derived = dict(data)
+    derived["notices"] = filtered
+    derived["matched_notices"] = len(filtered)
+    derived["applied_filters"] = {
+        "source_filters": source_filters,
+        "after_date": after,
+        "before_date": before,
+        "new_only": new_only,
+    }
+    return derived
+
+
 def render_page(data: dict) -> str:
     keywords = ", ".join(data.get("keywords", [])) if data.get("keywords") else "없음"
     applied_filters = data.get("applied_filters", {})
-    fetch_errors = data.get("fetch_errors", [])
-    filter_summary = []
-    if applied_filters.get("source_filters"):
-        filter_summary.append(f"출처: {', '.join(applied_filters['source_filters'])}")
-    if applied_filters.get("after_date"):
-        filter_summary.append(f"이후: {applied_filters['after_date']}")
-    if applied_filters.get("before_date"):
-        filter_summary.append(f"이전: {applied_filters['before_date']}")
-    if applied_filters.get("new_only"):
-        filter_summary.append("NEW만 표시")
-    filter_text = " · ".join(filter_summary) if filter_summary else "없음"
+    warnings = data.get("fetch_errors", [])
     rows = []
     for notice in data.get("notices", []):
-        date_text = escape(notice.get("date") or "-")
-        title = escape(notice.get("title", ""))
-        url = escape(notice.get("url", "#"), quote=True)
-        matched = ", ".join(notice.get("matched_keywords", []))
-        new_tag = '<span class="tag">NEW</span>' if notice.get("is_new") else ""
-        context = escape((notice.get("context") or "")[:140])
-        context_html = f"<div class='excerpt'>{context}</div>" if context else ""
         rows.append(
             "<tr>"
-            f"<td>{date_text}</td>"
+            f"<td>{escape(notice.get('date') or '-')}</td>"
             f"<td>{escape(notice.get('source', '-'))}</td>"
-            f"<td><a href=\"{url}\" target=\"_blank\" rel=\"noreferrer\">{title}</a>{new_tag}{context_html}</td>"
-            f"<td>{escape(matched)}</td>"
+            f"<td><a href=\"{escape(notice.get('url', '#'), quote=True)}\" target=\"_blank\" rel=\"noreferrer\">{escape(notice.get('title', ''))}</a>"
+            f"{'<span class=\"tag\">NEW</span>' if notice.get('is_new') else ''}"
+            f"{'<div class=\"excerpt\">' + escape((notice.get('context') or '')[:140]) + '</div>' if notice.get('context') else ''}</td>"
+            f"<td>{escape(', '.join(notice.get('matched_keywords', [])))}</td>"
             "</tr>"
         )
-    table_html = (
-        "<table><thead><tr><th style='width:120px;'>날짜</th><th style='width:190px;'>출처</th><th>제목</th><th style='width:140px;'>매칭 키워드</th>"
-        "</tr></thead><tbody>"
+
+    table = (
+        "<table><thead><tr><th style='width:120px;'>날짜</th><th style='width:180px;'>출처</th><th>제목</th><th style='width:140px;'>매칭 키워드</th></tr></thead><tbody>"
         + "".join(rows)
         + "</tbody></table>"
+        if rows
+        else "<div class='empty'>매칭된 공고가 없습니다.</div>"
     )
-    if not rows:
-        table_html = "<div class='empty'>매칭된 공고가 없습니다.</div>"
-
-    refresh_url = "/?refresh=1"
-    if applied_filters:
-        query_params: list[tuple[str, str]] = [("refresh", "1")]
-        for source in applied_filters.get("source_filters", []):
-            query_params.append(("source", source))
-        if applied_filters.get("after_date"):
-            query_params.append(("after", applied_filters["after_date"]))
-        if applied_filters.get("before_date"):
-            query_params.append(("before", applied_filters["before_date"]))
-        if applied_filters.get("new_only"):
-            query_params.append(("new", "1"))
-        refresh_url = "/?" + urlencode(query_params)
+    refresh_query = urlencode(
+        [("refresh", "1")]
+        + [("source", item) for item in applied_filters.get("source_filters", [])]
+        + ([("after", applied_filters["after_date"])] if applied_filters.get("after_date") else [])
+        + ([("before", applied_filters["before_date"])] if applied_filters.get("before_date") else [])
+        + ([("new", "1")] if applied_filters.get("new_only") else [])
+    )
+    filter_parts = []
+    if applied_filters.get("source_filters"):
+        filter_parts.append(f"출처: {', '.join(applied_filters['source_filters'])}")
+    if applied_filters.get("after_date"):
+        filter_parts.append(f"이후: {applied_filters['after_date']}")
+    if applied_filters.get("before_date"):
+        filter_parts.append(f"이전: {applied_filters['before_date']}")
+    if applied_filters.get("new_only"):
+        filter_parts.append("NEW만 표시")
+    filter_text = " · ".join(filter_parts) if filter_parts else "없음"
 
     return f"""<!doctype html>
 <html lang="ko">
@@ -94,61 +132,26 @@ def render_page(data: dict) -> str:
     키워드: {escape(keywords)}<br />
     필터: {escape(filter_text)}
   </div>
-  {"<div class='warning'>수집 경고: " + escape("; ".join(fetch_errors)) + "</div>" if fetch_errors else ""}
-  <a class="btn" href="{refresh_url}">새로고침</a>
-  {table_html}
+  {"<div class='warning'>수집 경고: " + escape("; ".join(warnings)) + "</div>" if warnings else ""}
+  <a class="btn" href="/?{refresh_query}">새로고침</a>
+  {table}
 </body>
 </html>
 """
 
 
-# 최신 데이터가 없거나 새로고침 요청 시 수집 실행
 def get_data(refresh: bool, filters: dict[str, list[str] | str | bool]) -> dict:
-    config = load_config(
-        DEFAULT_CONFIG_PATH,
-        source_filters_override=filters.get("source") if isinstance(filters.get("source"), list) else None,
-        after_date_override=filters.get("after") if isinstance(filters.get("after"), str) else None,
-        before_date_override=filters.get("before") if isinstance(filters.get("before"), str) else None,
-        new_only_override=bool(filters.get("new_only", False)),
-    )
-    latest_path = config.storage_dir / "latest.json"
+    config = build_config(filters)
+    latest_path = config["storage_dir"] / "latest.json"
     if refresh or not latest_path.exists():
-        return collect_and_save(config=config)
+        return collect_and_save(config)
+
     data = load_json(latest_path)
     if data is None:
-        return collect_and_save(config=config)
-
-    source_filters = filters.get("source") if isinstance(filters.get("source"), list) else []
-    after = filters.get("after") if isinstance(filters.get("after"), str) else None
-    before = filters.get("before") if isinstance(filters.get("before"), str) else None
-    new_only = bool(filters.get("new_only", False))
-
-    if source_filters or after or before or new_only:
-        all_notices = data.get("all_notices") or data.get("notices", [])
-        filtered = filter_notices_by_criteria(
-            all_notices,
-            data.get("keywords", []),
-            source_filters=source_filters,
-            after_date=after,
-            before_date=before,
-            new_only=new_only,
-        )
-        derived = dict(data)
-        derived["notices"] = filtered
-        derived["matched_notices"] = len(filtered)
-        derived["applied_filters"] = {
-            "source_filters": source_filters,
-            "after_date": after,
-            "before_date": before,
-            "new_only": new_only,
-        }
-        derived["fetch_errors"] = data.get("fetch_errors", [])
-        return derived
-
-    return data
+        return collect_and_save(config)
+    return apply_filters(data, filters)
 
 
-# WSGI 엔트리: 라우팅/쿼리 처리 후 HTML 응답 생성
 def app(environ, start_response):
     parsed = urlparse(environ.get("PATH_INFO", "/") + ("?" + environ.get("QUERY_STRING", "") if environ.get("QUERY_STRING") else ""))
     if parsed.path != "/":
@@ -156,21 +159,19 @@ def app(environ, start_response):
         return [b"Not Found"]
 
     query = parse_qs(parsed.query)
-    refresh = query.get("refresh", ["0"])[0] == "1"
     filters = {
         "source": [item for raw in query.get("source", []) for item in raw.split(",") if item.strip()],
         "after": query.get("after", [None])[0],
         "before": query.get("before", [None])[0],
         "new_only": query.get("new", ["0"])[0] == "1" or query.get("new_only", ["0"])[0] == "1",
     }
-    data = get_data(refresh=refresh, filters=filters)
+    data = get_data(query.get("refresh", ["0"])[0] == "1", filters)
     html = render_page(data).encode("utf-8")
     start_response("200 OK", [("Content-Type", "text/html; charset=utf-8"), ("Content-Length", str(len(html)))])
     return [html]
 
 
 if __name__ == "__main__":
-    # 로컬 개발용 간단 서버 실행
     with make_server("127.0.0.1", 5000, app) as server:
         print("Web UI: http://127.0.0.1:5000")
         server.serve_forever()

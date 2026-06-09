@@ -56,7 +56,7 @@
 - 핵심 로직: `notice_radar.py`
 - 설정 파일: `config.json`
   - 기본 관심 키워드: `해외`, `학부연구생`
-  - 기본 소스 파일: `url.md` (여기 있는 URL 전체를 순회 수집)
+  - 기본 소스: `config.json`의 `source_url` 또는 내장 기본 URL
 
 ---
 
@@ -71,7 +71,6 @@ python main.py
 
 - `data/latest.json`: 현재 실행 결과
 - `data/previous.json`: 이전 실행 결과 백업
-- `data/history.jsonl`: 실행 이력
 - `result.txt`: 터미널 확인용 텍스트 결과 (`NEW` 포함)
 
 ### 웹페이지 실행
@@ -97,7 +96,6 @@ python web_app.py
 python main.py --keyword 해외 --keyword 학부연구생
 python main.py --source-url "https://home.knu.ac.kr/HOME/seeai/"
 python main.py --source "학부 공지" --after 2026-06-01 --new-only
-python main.py --offline-html "IT대학-전자공학부-인공지능전공_files/index.html"
 ```
 
 ---
