@@ -31,6 +31,12 @@ def save_json(path: Path, data: dict[str, Any]) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+def append_jsonl(path: Path, data: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as file:
+        file.write(json.dumps(data, ensure_ascii=False) + "\n")
+
+
 # 공백 정규화: 여러 공백/개행을 하나의 공백으로 합침
 def normalize_text(text: str) -> str:
     return " ".join(text.split())
@@ -44,6 +50,15 @@ def extract_date(anchor) -> str:
             match = DATE_PATTERN.search(block_text)
             if match:
                 return match.group(1).replace(".", "-").replace("/", "-")
+    return ""
+
+
+def extract_context(anchor) -> str:
+    for parent in anchor.parents:
+        if parent.name in {"li", "tr", "div", "article", "section"}:
+            block_text = normalize_text(parent.get_text(" ", strip=True))
+            if block_text:
+                return block_text[:500]
     return ""
 
 
@@ -69,6 +84,7 @@ def parse_notices(html: str, base_url: str, source_name: str) -> list[dict[str, 
             continue
 
         seen_urls.add(absolute_url)
+        context = extract_context(anchor)
         notices.append(
             {
                 "id": hashlib.sha1(absolute_url.encode("utf-8")).hexdigest()[:16],
@@ -76,6 +92,7 @@ def parse_notices(html: str, base_url: str, source_name: str) -> list[dict[str, 
                 "url": absolute_url,
                 "date": extract_date(anchor),
                 "source": source_name,
+                "context": context,
             }
         )
 
@@ -97,6 +114,10 @@ def parse_notice_date(date_text: str) -> datetime | None:
         return None
 
 
+def build_notice_search_text(notice: dict[str, Any]) -> str:
+    return normalize_text(" ".join(part for part in [str(notice.get("title", "")), str(notice.get("context", ""))] if part)).casefold()
+
+
 # 공지 목록을 날짜 기준 최신순 정렬
 def sort_notices_latest(notices: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return sorted(
@@ -106,22 +127,66 @@ def sort_notices_latest(notices: list[dict[str, Any]]) -> list[dict[str, Any]]:
     )
 
 
-# 제목에 키워드가 포함된 공지를 필터링하고 매칭 키워드 기록
-def filter_notices_by_title(notices: list[dict[str, Any]], keywords: list[str]) -> list[dict[str, Any]]:
+def filter_notices_by_keywords(notices: list[dict[str, Any]], keywords: list[str]) -> list[dict[str, Any]]:
     cleaned_keywords = [k.strip() for k in keywords if k.strip()]
     if not cleaned_keywords:
-        return []
+        return [dict(notice, matched_keywords=[]) for notice in notices]
 
     filtered: list[dict[str, Any]] = []
     for notice in notices:
-        title = notice.get("title", "")
-        matched = [k for k in cleaned_keywords if k in title]
+        search_text = build_notice_search_text(notice)
+        matched = [k for k in cleaned_keywords if k.casefold() in search_text]
         if matched:
             entry = dict(notice)
             entry["matched_keywords"] = matched
             filtered.append(entry)
 
     return filtered
+
+
+def parse_notice_filter_date(date_text: str | None) -> datetime | None:
+    if not date_text:
+        return None
+    parsed = parse_notice_date(date_text)
+    if parsed is not None:
+        return parsed
+    try:
+        return datetime.fromisoformat(date_text)
+    except ValueError:
+        return None
+
+
+def filter_notices_by_criteria(
+    notices: list[dict[str, Any]],
+    keywords: list[str],
+    source_filters: list[str] | None = None,
+    after_date: str | None = None,
+    before_date: str | None = None,
+    new_only: bool = False,
+) -> list[dict[str, Any]]:
+    filtered = filter_notices_by_keywords(notices, keywords)
+    source_terms = [item.strip().casefold() for item in (source_filters or []) if item.strip()]
+    after = parse_notice_filter_date(after_date)
+    before = parse_notice_filter_date(before_date)
+
+    result: list[dict[str, Any]] = []
+    for notice in filtered:
+        source_text = str(notice.get("source", "")).casefold()
+        url_text = str(notice.get("url", "")).casefold()
+        if source_terms and not any(term in source_text or term in url_text for term in source_terms):
+            continue
+
+        notice_date = parse_notice_date(str(notice.get("date", "")))
+        if after is not None and (notice_date is None or notice_date < after):
+            continue
+        if before is not None and (notice_date is None or notice_date > before):
+            continue
+        if new_only and not notice.get("is_new"):
+            continue
+
+        result.append(notice)
+
+    return result
 
 
 # 결과를 사람이 읽기 쉬운 텍스트 파일로 저장
@@ -138,6 +203,9 @@ def write_result_text(path: Path, filtered: list[dict[str, Any]]) -> None:
             lines.append(f"   - 출처: {notice.get('source', '-')}")
             lines.append(f"   - 키워드: {', '.join(notice.get('matched_keywords', []))}")
             lines.append(f"   - 링크: {notice['url']}")
+            context = notice.get("context")
+            if context:
+                lines.append(f"   - 요약: {context}")
             lines.append("")
 
     path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
@@ -218,6 +286,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--config", default="config.json", help="설정 파일 경로")
     parser.add_argument("--source-url", help="공지 수집 URL (설정 덮어쓰기)")
     parser.add_argument("--keyword", action="append", default=None, help="관심 키워드(여러 번 사용 가능)")
+    parser.add_argument("--source", action="append", default=None, help="출처 필터(여러 번 사용 가능)")
+    parser.add_argument("--after", help="이 날짜 이후 공지만 표시 (YYYY-MM-DD)")
+    parser.add_argument("--before", help="이 날짜 이전 공지만 표시 (YYYY-MM-DD)")
+    parser.add_argument("--new-only", action="store_true", help="새로 발견된 공지만 표시")
     parser.add_argument("--limit", type=int, help="최대 수집 건수")
     parser.add_argument("--offline-html", help="저장한 HTML 파일로 테스트")
     return parser.parse_args()
@@ -228,6 +300,10 @@ def collect_and_save(
     config_path: Path = Path("config.json"),
     source_url_override: str | None = None,
     keywords_override: list[str] | None = None,
+    source_filters_override: list[str] | None = None,
+    after_date_override: str | None = None,
+    before_date_override: str | None = None,
+    new_only_override: bool = False,
     limit_override: int | None = None,
     offline_html_path: str | None = None,
 ) -> dict[str, Any]:
@@ -238,6 +314,7 @@ def collect_and_save(
     sources_file = Path(config.get("sources_file", "url.md"))
     latest_path = storage_dir / "latest.json"
     previous_path = storage_dir / "previous.json"
+    history_path = storage_dir / "history.jsonl"
     result_path = Path("result.txt")
 
     if source_url_override:
@@ -266,28 +343,56 @@ def collect_and_save(
     notices = list(dedup.values())
     notices = sort_notices_latest(notices)
     notices = notices[: max(limit, 0)]
-    filtered = filter_notices_by_title(notices, keywords)
-    filtered = sort_notices_latest(filtered)
 
     previous_data = load_json(latest_path)
     previous_ids = set()
     if previous_data:
-        previous_ids = {item["id"] for item in previous_data.get("notices", [])}
+        previous_source = previous_data.get("all_notices") or previous_data.get("notices", [])
+        previous_ids = {item["id"] for item in previous_source}
         save_json(previous_path, previous_data)
 
-    for item in filtered:
+    for item in notices:
         item["is_new"] = item["id"] not in previous_ids
 
+    filtered = filter_notices_by_criteria(
+        notices,
+        keywords,
+        source_filters=source_filters_override,
+        after_date=after_date_override,
+        before_date=before_date_override,
+        new_only=new_only_override,
+    )
+    filtered = sort_notices_latest(filtered)
+
     now = datetime.now().isoformat(timespec="seconds")
+    applied_filters = {
+        "source_filters": source_filters_override or [],
+        "after_date": after_date_override,
+        "before_date": before_date_override,
+        "new_only": new_only_override,
+    }
     save_json(
         latest_path,
         {
             "updated_at": now,
             "sources": sources,
             "keywords": keywords,
+            "applied_filters": applied_filters,
             "total_notices": len(notices),
             "matched_notices": len(filtered),
+            "all_notices": notices,
             "notices": filtered,
+        },
+    )
+    append_jsonl(
+        history_path,
+        {
+            "updated_at": now,
+            "sources": sources,
+            "keywords": keywords,
+            "applied_filters": applied_filters,
+            "total_notices": len(notices),
+            "matched_notices": len(filtered),
         },
     )
     write_result_text(result_path, filtered)
@@ -296,11 +401,14 @@ def collect_and_save(
         "updated_at": now,
         "sources": sources,
         "keywords": keywords,
+        "applied_filters": applied_filters,
         "total_notices": len(notices),
         "matched_notices": len(filtered),
         "notices": filtered,
+        "all_notices": notices,
         "latest_path": str(latest_path),
         "result_path": str(result_path),
+        "history_path": str(history_path),
     }
 
 
@@ -311,6 +419,10 @@ def main() -> None:
         config_path=Path(args.config),
         source_url_override=args.source_url,
         keywords_override=args.keyword,
+        source_filters_override=args.source,
+        after_date_override=args.after,
+        before_date_override=args.before,
+        new_only_override=args.new_only,
         limit_override=args.limit,
         offline_html_path=args.offline_html,
     )
@@ -318,6 +430,7 @@ def main() -> None:
     print(f"수집: {data['total_notices']}건 / 키워드 매칭: {data['matched_notices']}건")
     print(f"- JSON: {data['latest_path']}")
     print(f"- TEXT: {data['result_path']}")
+    print(f"- HISTORY: {data['history_path']}")
 
 
 if __name__ == "__main__":

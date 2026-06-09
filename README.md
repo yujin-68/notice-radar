@@ -71,6 +71,7 @@ python main.py
 
 - `data/latest.json`: 현재 실행 결과
 - `data/previous.json`: 이전 실행 결과 백업
+- `data/history.jsonl`: 실행 이력
 - `result.txt`: 터미널 확인용 텍스트 결과 (`NEW` 포함)
 
 ### 웹페이지 실행
@@ -95,6 +96,7 @@ python web_app.py
 ```bash
 python main.py --keyword 해외 --keyword 학부연구생
 python main.py --source-url "https://home.knu.ac.kr/HOME/seeai/"
+python main.py --source "학부 공지" --after 2026-06-01 --new-only
 python main.py --offline-html "IT대학-전자공학부-인공지능전공_files/index.html"
 ```
 
