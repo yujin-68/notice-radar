@@ -33,11 +33,12 @@
 
 - **`parse_notices(html, base_url, source_name)`**
   - HTML 내 `<a href>`를 순회하며 공지 링크 후보를 수집
-  - `NOTICE_HREF_PATTERNS`에 해당하는 링크만 “공지 상세”로 간주
+  - `NOTICE_HREF_PATTERNS`(`mode=view`, `viewBtin.action`, `pg=vv`)가 들어간 링크만 공지로 간주
   - 링크 중복 제거(절대 URL 기준)
+  - 제목은 링크 텍스트에서, 글 내용은 가장 가까운 목록 블록(`li/tr/div/article/section`)의 텍스트에서 가져옴
   - 결과 항목 구조:
     - `id`: URL 해시 기반 식별자
-    - `title`, `url`, `date`, `source`
+    - `title`, `url`, `date`, `source`, `context`
 
 ### 2.4 날짜 파싱 및 정렬
 
@@ -48,8 +49,11 @@
 
 ### 2.5 키워드 필터링
 
-- **`filter_notices_by_title(notices, keywords)`**
-  - 제목에 포함된 키워드가 하나라도 있으면 매칭
+- **`filter_notices(notices, keywords, source_filters, after, before, new_only)`**
+  - 제목 + 요약 문맥(`context`)을 합친 텍스트에서 키워드를 찾음
+  - 출처 이름/URL에 포함된 문자열로 출처 필터링
+  - `after` / `before` 날짜 범위 필터 적용
+  - `new_only`가 켜져 있으면 새 공지만 남김
   - 매칭된 키워드를 `matched_keywords`로 기록
 
 ### 2.6 HTML 수집
@@ -58,24 +62,20 @@
   - 요청 URL이 디렉터리 형태면 `/index.htm`도 시도
   - `User-Agent`, `Accept-Language`, `Referer` 헤더 지정
   - frameset 구조일 경우 `frame`의 `src`를 따라가 실제 콘텐츠 HTML을 반환
+  - 페이지네이션은 따라가지 않음: 각 소스의 현재 첫 목록 HTML만 수집
 
-### 2.7 소스 목록 파싱
-
-- **`parse_sources_from_markdown(path)`**
-  - 마크다운 텍스트에서 URL을 추출해 소스 목록 생성
-  - `url.md`가 존재할 경우 설정 소스로 사용됨
-
-### 2.8 전체 파이프라인
+### 2.7 전체 파이프라인
 
 - **`collect_and_save(...)`**
-  1. `config.json` 로드 및 오버라이드 적용
-  2. 소스 URL 결정(직접 입력 → 설정 → 마크다운 → 기본 URL)
-  3. HTML 수집 및 공지 파싱
-  4. URL 중복 제거 후 최신순 정렬
-  5. 키워드 필터링 및 최신순 정렬
-  6. 이전 실행 결과(`latest.json`)를 불러 NEW 여부 표시
-  7. `latest.json`, `previous.json`, `result.txt` 저장
-  8. 요약 dict 반환
+  1. `config.json` 로드 및 CLI 인자 오버라이드 적용
+  2. `sources` 목록의 각 소스 페이지 HTML 수집
+  3. 각 페이지에서 공지 링크/제목/날짜/요약 문맥 추출
+  4. 모든 소스를 합친 뒤 URL 기준 중복 제거
+  5. 날짜 기준 최신순 정렬 후 `limit`개만 `all_notices`에 유지
+  6. 이전 `latest.json`과 비교해 `is_new` 표시
+  7. 키워드/출처/기간/NEW 조건으로 `notices`를 추가 필터링
+  8. `latest.json`, `previous.json`, `result.txt` 저장
+  9. 요약 dict 반환
 
 ### 2.9 CLI 엔트리
 
@@ -102,6 +102,7 @@
 - **`get_data(refresh)`**
   - `data/latest.json`이 없거나 `refresh=1`이면 수집 실행
   - 그렇지 않으면 저장된 최신 결과 사용
+  - 화면의 필터는 저장된 `all_notices`에 대해 다시 적용됨
 
 ### 4.3 WSGI 애플리케이션
 
@@ -118,17 +119,20 @@
 
 1. 사용자 실행 (`python main.py` 또는 `python web_app.py`)
 2. 설정 로드 및 오버라이드 적용
-3. 소스 URL별 HTML 다운로드
-4. 공지 링크/제목/날짜 추출
-5. 중복 제거 및 최신순 정렬
-6. 키워드 필터링
+3. 각 소스의 첫 목록 페이지 HTML 다운로드
+4. 목록 블록에서 공지 링크/제목/날짜/요약 문맥 추출
+5. 전체 소스 합산 후 URL 중복 제거
+6. 최신순 정렬 후 최대 30개만 `all_notices`에 저장
 7. 이전 실행 결과와 비교해 `NEW` 표시
-8. 파일 저장 및 출력
+8. 키워드/출처/기간/NEW 조건으로 `notices` 필터링
+9. 파일 저장 및 출력
 
 ## 6. 저장 파일 구조
 
 - **`data/latest.json`**
-  - 최신 실행 스냅샷 (sources/keywords/매칭 결과 포함)
+  - 최신 실행 스냅샷
+  - `all_notices`: 중복 제거 + 최신순 정렬 + limit 적용 결과
+  - `notices`: 추가 필터가 적용된 결과
 - **`data/previous.json`**
   - 직전 `latest.json`의 백업 (NEW 판단 기준)
 - **`result.txt`**
@@ -145,10 +149,11 @@
 
 ## 8. 주요 동작 규칙 / 제약
 
-- **키워드 매칭**: 제목에 포함된 키워드가 하나라도 있으면 매칭(OR 조건)
+- **키워드 매칭**: 제목 + 요약 문맥에 포함된 키워드가 하나라도 있으면 매칭(OR 조건)
 - **중복 제거**: URL 기준으로 dedup
 - **NEW 표시**: 이전 실행 결과와 비교하여 `id`가 새로 등장한 경우
 - **날짜 추출**: 링크 주변 블록 텍스트에서 정규식으로 탐색
+- **수집 범위**: 각 소스의 첫 목록 HTML만 수집하고, 다음 페이지는 따라가지 않음
 
 ## 9. 확장 포인트
 
