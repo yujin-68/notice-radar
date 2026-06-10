@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from os import getenv
 from datetime import datetime, timedelta
 from html import escape
 from pathlib import Path
@@ -10,13 +11,24 @@ from wsgiref.simple_server import make_server
 from notice_radar import DEFAULT_CONFIG_PATH, DEFAULT_SOURCE_URL, collect_and_save, load_json
 
 
+def is_vercel_runtime() -> bool:
+    return getenv("VERCEL") == "1" or bool(getenv("VERCEL_ENV"))
+
+
+def runtime_storage_path(path: Path) -> Path:
+    if not is_vercel_runtime():
+        return path
+    base_dir = Path(getenv("VERCEL_TMPDIR", "/tmp")) / "notice-radar"
+    return base_dir / path.name if path.is_absolute() else base_dir / path
+
+
 def load_base_config() -> dict:
     base = load_json(DEFAULT_CONFIG_PATH) or {}
     return {
         "keywords": list(base.get("keywords", [])),
         "limit": int(base.get("limit", 30)),
-        "storage_dir": Path(base.get("storage_dir", "data")),
-        "result_path": Path(base.get("result_path", "result.txt")),
+        "storage_dir": runtime_storage_path(Path(base.get("storage_dir", "data"))),
+        "result_path": runtime_storage_path(Path(base.get("result_path", "result.txt"))),
         "timeout": int(base.get("timeout", 20)),
         "sources": base.get("sources") or [{"name": "기본 소스", "url": base.get("source_url", DEFAULT_SOURCE_URL)}],
     }

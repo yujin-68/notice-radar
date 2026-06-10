@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 from datetime import datetime
 from pathlib import Path
@@ -21,6 +22,17 @@ DEFAULT_LIMIT = 30
 HTML_TAGS = {"li", "tr", "div", "article", "section"}
 DATE_PATTERN = re.compile(r"(20\d{2}[./-]\d{1,2}[./-]\d{1,2})")
 NOTICE_HREF_PATTERNS = ("mode=view", "viewBtin.action", "pg=vv")
+
+
+def is_vercel_runtime() -> bool:
+    return os.getenv("VERCEL") == "1" or bool(os.getenv("VERCEL_ENV"))
+
+
+def runtime_storage_path(path: Path) -> Path:
+    if not is_vercel_runtime():
+        return path
+    base_dir = Path(os.getenv("VERCEL_TMPDIR", "/tmp")) / "notice-radar"
+    return base_dir / path.name if path.is_absolute() else base_dir / path
 
 
 def load_json(path: Path) -> dict[str, Any] | None:
@@ -202,8 +214,8 @@ def load_config(args: argparse.Namespace) -> dict[str, Any]:
         "after": args.after,
         "before": args.before,
         "limit": args.limit if args.limit is not None else int(config.get("limit", DEFAULT_LIMIT)),
-        "storage_dir": Path(config.get("storage_dir", DEFAULT_STORAGE_DIR)),
-        "result_path": Path(config.get("result_path", DEFAULT_RESULT_PATH)),
+        "storage_dir": runtime_storage_path(Path(config.get("storage_dir", DEFAULT_STORAGE_DIR))),
+        "result_path": runtime_storage_path(Path(config.get("result_path", DEFAULT_RESULT_PATH))),
         "timeout": int(config.get("timeout", DEFAULT_TIMEOUT)),
         "sources": sources,
     }
