@@ -32,14 +32,14 @@ def period_to_after(period: str) -> datetime | None:
     return datetime.now() - timedelta(days=days) if days else None
 
 
-def parse_state(query: dict[str, list[str]], base_keywords: list[str]) -> dict:
+def parse_state(query: dict[str, list[str]]) -> dict:
     keyword_text = query.get("keywords", [""])[0].strip()
-    keywords = split_keywords(keyword_text) if keyword_text else base_keywords
+    keywords = split_keywords(keyword_text) if keyword_text else []
     source = query.get("source", ["all"])[0]
     period = query.get("period", ["all"])[0]
     new_only = query.get("new", ["all"])[0] == "only"
     return {
-        "keyword_text": keyword_text or ", ".join(base_keywords),
+        "keyword_text": keyword_text,
         "keywords": keywords,
         "source": source,
         "period": period,
@@ -228,7 +228,7 @@ def get_data(refresh: bool, query: dict[str, list[str]]) -> tuple[dict, dict]:
         data = collect_and_save(base)
     else:
         data = load_json(latest_path) or collect_and_save(base)
-    state = parse_state(query, base["keywords"])
+    state = parse_state(query)
     return apply_filters(data, state), state
 
 
