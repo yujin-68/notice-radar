@@ -215,18 +215,18 @@ def load_config(args: argparse.Namespace) -> dict[str, Any]:
 
 
 def collect_and_save(config: dict[str, Any]) -> dict[str, Any]:
-    storage_dir = config["storage_dir"]
+    storage_dir = Path(config["storage_dir"])
     latest_path = storage_dir / "latest.json"
     previous_path = storage_dir / "previous.json"
-    result_path = config["result_path"]
+    result_path = Path(config["result_path"])
 
-    sources = config["sources"]
+    sources = config.get("sources", [{"name": "기본 소스", "url": DEFAULT_SOURCE_URL}])
     notices: list[dict[str, Any]] = []
     warnings: list[str] = []
 
     for source in sources:
         try:
-            html = fetch_html(source["url"], timeout=config["timeout"])
+            html = fetch_html(source["url"], timeout=config.get("timeout", DEFAULT_TIMEOUT))
             notices.extend(parse_notices(html, source["url"], source["name"]))
         except requests.RequestException as error:
             warnings.append(f"{source['name']}: {error}")
@@ -234,18 +234,18 @@ def collect_and_save(config: dict[str, Any]) -> dict[str, Any]:
     previous_data = load_json(latest_path) or {}
     previous_ids = {item["id"] for item in previous_data.get("all_notices", previous_data.get("notices", []))}
 
-    all_notices = sort_notices_latest({notice["url"]: notice for notice in notices}.values())[: max(config["limit"], 0)]
+    all_notices = sort_notices_latest({notice["url"]: notice for notice in notices}.values())[: max(int(config.get("limit", DEFAULT_LIMIT)), 0)]
     for notice in all_notices:
         notice["is_new"] = notice["id"] not in previous_ids
 
     filtered = sort_notices_latest(
         filter_notices(
             all_notices,
-            config["keywords"],
-            config["source_filters"],
-            config["after"],
-            config["before"],
-            config["new_only"],
+            config.get("keywords", []),
+            config.get("source_filters", []),
+            config.get("after"),
+            config.get("before"),
+            config.get("new_only", False),
         )
     )
 
@@ -256,12 +256,12 @@ def collect_and_save(config: dict[str, Any]) -> dict[str, Any]:
     summary = {
         "updated_at": updated_at,
         "sources": sources,
-        "keywords": config["keywords"],
+        "keywords": config.get("keywords", []),
         "applied_filters": {
-            "source_filters": config["source_filters"],
-            "after_date": config["after"],
-            "before_date": config["before"],
-            "new_only": config["new_only"],
+            "source_filters": config.get("source_filters", []),
+            "after_date": config.get("after"),
+            "before_date": config.get("before"),
+            "new_only": config.get("new_only", False),
         },
         "total_notices": len(all_notices),
         "matched_notices": len(filtered),
@@ -278,7 +278,7 @@ def collect_and_save(config: dict[str, Any]) -> dict[str, Any]:
         {
             "updated_at": updated_at,
             "sources": sources,
-            "keywords": config["keywords"],
+            "keywords": config.get("keywords", []),
             "applied_filters": summary["applied_filters"],
             "total_notices": len(all_notices),
             "matched_notices": len(filtered),

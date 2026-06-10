@@ -1,52 +1,61 @@
 {
-  "updated_at": "2026-05-14T21:18:53",
+  "updated_at": "2026-06-10T23:11:10",
   "sources": [
     {
-      "name": "경북대학교 공지사항",
-      "url": "https://www.knu.ac.kr/wbbs/wbbs/bbs/btin/list.action?bbs_cde=1&menu_idx=67"
-    },
-    {
-      "name": "행사 안내",
-      "url": "https://www.knu.ac.kr/wbbs/wbbs/bbs/btin/list.action?bbs_cde=11&menu_idx=73"
-    },
-    {
-      "name": "경북대 직원 채용",
-      "url": "https://www.knu.ac.kr/wbbs/wbbs/bbs/btin/list.action?bbs_cde=8&menu_idx=220"
-    },
-    {
-      "name": "IT대학 공지사항",
-      "url": "https://it.knu.ac.kr/"
-    },
-    {
-      "name": "IT대학 전자공학부 공지사항",
-      "url": "https://see.knu.ac.kr/content/board/notice.html"
-    },
-    {
-      "name": "IT대학 전자공학부 인공지능전공 공지사항",
-      "url": "https://seeai.knu.ac.kr/"
-    },
-    {
-      "name": "인공지능혁신융합대학 사업단 공지사항",
-      "url": "https://aic.knu.ac.kr/"
+      "name": "기본 소스",
+      "url": "https://home.knu.ac.kr/HOME/seeai/"
     }
   ],
   "keywords": [
     "해외",
     "학부연구생"
   ],
-  "total_notices": 30,
-  "matched_notices": 1,
-  "notices": [
+  "applied_filters": {
+    "source_filters": [],
+    "after_date": null,
+    "before_date": null,
+    "new_only": false
+  },
+  "total_notices": 4,
+  "matched_notices": 0,
+  "fetch_errors": [],
+  "all_notices": [
     {
-      "id": "d2dc6544010608f2",
-      "title": "2026년 화성시인재육성재단 해외유학 장학금 장학생 모집 안내",
-      "url": "https://www.knu.ac.kr/wbbs/wbbs/bbs/btin/viewBtin.action?bbs_cde=&btin.bbs_cde=&btin.doc_no=1337407&btin.appl_no=000000&btin.page=/>&btin.search_type=&btin.search_text=&popupDeco=&btin.note_div=row&menu_idx=67",
-      "date": "2026-05-14",
-      "source": "경북대학교 공지사항",
-      "matched_keywords": [
-        "해외"
-      ],
+      "id": "550eabb8e5ac476a",
+      "title": "2026년 2학기 청년창업농장학금 신청 안내",
+      "url": "https://home.knu.ac.kr/HOME/seeai/sub.htm?nav_code=see1667180581&mode=view&mv_data=aWR4PTIxMCZzdGFydFBhZ2U9Jmxpc3RObz0mdGFibGU9ZXhfYmJzX2RhdGFfc2VlYWkmY29kZT1WZWpOTERSa3JIb2cmc2VhcmNoX2l0ZW09JnNlYXJjaF9vcmRlcj0mb3JkZXJfbGlzdD0mbGlzdF9zY2FsZT0mdmlld19sZXZlbD0mdmlld19jYXRlPSZ2aWV3X2NhdGUyPSZzaXRlX2NvZGU9c2VlYWk=",
+      "date": "2026-06-10",
+      "source": "기본 소스",
+      "context": "2026년 2학기 청년창업농장학금 신청 안내 2026/06/10 +",
+      "is_new": true
+    },
+    {
+      "id": "134ac45236f37e7d",
+      "title": "부산대학교 공동학위를 위한 2026학년도 2학기 학..",
+      "url": "https://home.knu.ac.kr/HOME/seeai/sub.htm?nav_code=see1667180581&mode=view&mv_data=aWR4PTIwOSZzdGFydFBhZ2U9Jmxpc3RObz0mdGFibGU9ZXhfYmJzX2RhdGFfc2VlYWkmY29kZT1WZWpOTERSa3JIb2cmc2VhcmNoX2l0ZW09JnNlYXJjaF9vcmRlcj0mb3JkZXJfbGlzdD0mbGlzdF9zY2FsZT0mdmlld19sZXZlbD0mdmlld19jYXRlPSZ2aWV3X2NhdGUyPSZzaXRlX2NvZGU9c2VlYWk=",
+      "date": "2026-06-09",
+      "source": "기본 소스",
+      "context": "부산대학교 공동학위를 위한 2026학년도 2학기 학.. 대상: 2026/2학기 기준 2학년 이상의 인공지능전공 학생기한: ~ 2026. .6. 15(화) 11:30﻿​------------------------------------------------------------------------------------------------------------------------------------------공동학위 참여 학과- 경북대학교: IT대학 전자공학부 인공지능전공- 부산대학교: 정보의.. 2026/06/09 +",
+      "is_new": false
+    },
+    {
+      "id": "d5779557ff77e2c3",
+      "title": "[두산로보틱스] “AI・로봇 엔지니어 양성과정(초급)” - 8기 모집..",
+      "url": "https://home.knu.ac.kr/HOME/seeai/sub.htm?nav_code=see1667180616&mode=view&mv_data=aWR4PTE1MiZzdGFydFBhZ2U9Jmxpc3RObz0mdGFibGU9ZXhfYmJzX2RhdGFfc2VlYWkmY29kZT1FWnMwVDQzaXpvbEcmc2VhcmNoX2l0ZW09JnNlYXJjaF9vcmRlcj0mb3JkZXJfbGlzdD0mbGlzdF9zY2FsZT0mdmlld19sZXZlbD0mdmlld19jYXRlPSZ2aWV3X2NhdGUyPSZzaXRlX2NvZGU9c2VlYWk=",
+      "date": "2026-01-25",
+      "source": "기본 소스",
+      "context": "[두산로보틱스] “AI・로봇 엔지니어 양성과정(초급)” - 8기 모집.. ※ 모집요강 · 모집기간: 현재 ~ 2026.01.25(일) 까지· 개강일 : 2026.02.09(월)· 교육기간: 2026.02.09(월) ~ 2026.0.09(금) (6개월)· 교육장소: ① 기술이론교육(4개월) : 비대면(ZOOM) ② 실무프로젝트교육(2개월) : 대면(구로 ROKEY 교육장)· 취.. 2026/01/13 +",
+      "is_new": false
+    },
+    {
+      "id": "fee60674be1f5693",
+      "title": "증명성적교과구분변경신청 (전공인정 수업)",
+      "url": "https://home.knu.ac.kr/HOME/seeai/sub.htm?nav_code=see1667180581&mode=view&mv_data=aWR4PTE1NiZzdGFydFBhZ2U9Jmxpc3RObz0mdGFibGU9ZXhfYmJzX2RhdGFfc2VlYWkmY29kZT1WZWpOTERSa3JIb2cmc2VhcmNoX2l0ZW09JnNlYXJjaF9vcmRlcj0mb3JkZXJfbGlzdD0mbGlzdF9zY2FsZT0mdmlld19sZXZlbD0mdmlld19jYXRlPSZ2aWV3X2NhdGUyPSZzaXRlX2NvZGU9c2VlYWk=",
+      "date": "2026-01-23",
+      "source": "기본 소스",
+      "context": "증명성적교과구분변경신청 (전공인정 수업) 교육과정편람 - 전공수업 중 교과목코드가 같은 경우(인공지능혁신융합대학사업단 학점 교류 수업 포함) → 전공 인정(증빙서류 필요 X)교육과정편람에 없는 수업인 경우 → 전공주임 교수님께 메일로 수업 내용 자세하게 설명하여 인정 받은 후 증빙서류 추가하여 신청.. 2026/01/23 +",
       "is_new": false
     }
-  ]
+  ],
+  "notices": []
 }

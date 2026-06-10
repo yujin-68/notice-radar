@@ -2,6 +2,29 @@
   "_comment": "KNU Notice Radar 기본 설정값",
   "_comment_sources_file": "소스 목록이 적힌 마크다운 파일 경로 (예: url.md)",
   "sources_file": "url.md",
+  "_comment_sources": "크롤링할 공지 소스 목록",
+  "sources": [
+    {
+      "name": "IT대학 전자공학부 인공지능전공",
+      "url": "https://home.knu.ac.kr/HOME/seeai/"
+    },
+    {
+      "name": "예술대학 디자인학과",
+      "url": "https://home.knu.ac.kr/HOME/vcd/sub.htm?nav_code=vcd1622551643"
+    },
+    {
+      "name": "국어국문학과",
+      "url": "https://home.knu.ac.kr/HOME/korean/"
+    },
+    {
+      "name": "기계공학부",
+      "url": "https://home.knu.ac.kr/HOME/me/index.htm"
+    },
+    {
+      "name": "행정학부",
+      "url": "https://home.knu.ac.kr/HOME/puad/index.htm"
+    }
+  ],
   "_comment_keywords": "관심 키워드 목록 (제목에 포함되면 매칭됨)",
   "keywords": [
     "해외",

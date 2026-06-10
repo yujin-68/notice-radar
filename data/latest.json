@@ -1,52 +1,311 @@
 {
-  "updated_at": "2026-05-14T21:31:57",
+  "updated_at": "2026-06-11T01:13:53",
   "sources": [
     {
-      "name": "경북대학교 공지사항",
-      "url": "https://www.knu.ac.kr/wbbs/wbbs/bbs/btin/list.action?bbs_cde=1&menu_idx=67"
+      "name": "IT대학 전자공학부 인공지능전공",
+      "url": "https://home.knu.ac.kr/HOME/seeai/"
     },
     {
-      "name": "행사 안내",
-      "url": "https://www.knu.ac.kr/wbbs/wbbs/bbs/btin/list.action?bbs_cde=11&menu_idx=73"
+      "name": "예술대학 디자인학과",
+      "url": "https://home.knu.ac.kr/HOME/vcd/sub.htm?nav_code=vcd1622551643"
     },
     {
-      "name": "경북대 직원 채용",
-      "url": "https://www.knu.ac.kr/wbbs/wbbs/bbs/btin/list.action?bbs_cde=8&menu_idx=220"
+      "name": "국어국문학과",
+      "url": "https://home.knu.ac.kr/HOME/korean/"
     },
     {
-      "name": "IT대학 공지사항",
-      "url": "https://it.knu.ac.kr/"
+      "name": "기계공학부",
+      "url": "https://home.knu.ac.kr/HOME/me/index.htm"
     },
     {
-      "name": "IT대학 전자공학부 공지사항",
-      "url": "https://see.knu.ac.kr/content/board/notice.html"
-    },
-    {
-      "name": "IT대학 전자공학부 인공지능전공 공지사항",
-      "url": "https://seeai.knu.ac.kr/"
-    },
-    {
-      "name": "인공지능혁신융합대학 사업단 공지사항",
-      "url": "https://aic.knu.ac.kr/"
+      "name": "행정학부",
+      "url": "https://home.knu.ac.kr/HOME/puad/index.htm"
     }
   ],
   "keywords": [
     "해외",
     "학부연구생"
   ],
+  "applied_filters": {
+    "source_filters": [],
+    "after_date": null,
+    "before_date": null,
+    "new_only": false
+  },
   "total_notices": 30,
-  "matched_notices": 1,
-  "notices": [
+  "matched_notices": 0,
+  "fetch_errors": [],
+  "all_notices": [
     {
-      "id": "d2dc6544010608f2",
-      "title": "2026년 화성시인재육성재단 해외유학 장학금 장학생 모집 안내",
-      "url": "https://www.knu.ac.kr/wbbs/wbbs/bbs/btin/viewBtin.action?bbs_cde=&btin.bbs_cde=&btin.doc_no=1337407&btin.appl_no=000000&btin.page=/>&btin.search_type=&btin.search_text=&popupDeco=&btin.note_div=row&menu_idx=67",
-      "date": "2026-05-14",
-      "source": "경북대학교 공지사항",
-      "matched_keywords": [
-        "해외"
-      ],
+      "id": "550eabb8e5ac476a",
+      "title": "2026년 2학기 청년창업농장학금 신청 안내",
+      "url": "https://home.knu.ac.kr/HOME/seeai/sub.htm?nav_code=see1667180581&mode=view&mv_data=aWR4PTIxMCZzdGFydFBhZ2U9Jmxpc3RObz0mdGFibGU9ZXhfYmJzX2RhdGFfc2VlYWkmY29kZT1WZWpOTERSa3JIb2cmc2VhcmNoX2l0ZW09JnNlYXJjaF9vcmRlcj0mb3JkZXJfbGlzdD0mbGlzdF9zY2FsZT0mdmlld19sZXZlbD0mdmlld19jYXRlPSZ2aWV3X2NhdGUyPSZzaXRlX2NvZGU9c2VlYWk=",
+      "date": "2026-06-10",
+      "source": "IT대학 전자공학부 인공지능전공",
+      "context": "2026년 2학기 청년창업농장학금 신청 안내 2026/06/10 +",
       "is_new": false
+    },
+    {
+      "id": "e30f7b935c2061fd",
+      "title": "2026학년도 2학기 대학원 학위논문 일정 변경 안..",
+      "url": "https://home.knu.ac.kr/HOME/me/sub.htm?nav_code=me1623639997&mode=view&mv_data=aWR4PTY2MTgmc3RhcnRQYWdlPSZsaXN0Tm89JnRhYmxlPWV4X2Jic19kYXRhX21lJmNvZGU9cGFjdnN2SXRwOG40JnNlYXJjaF9pdGVtPSZzZWFyY2hfb3JkZXI9Jm9yZGVyX2xpc3Q9Jmxpc3Rfc2NhbGU9JnZpZXdfbGV2ZWw9JnZpZXdfY2F0ZT0mdmlld19jYXRlMj0mc2l0ZV9jb2RlPW1l",
+      "date": "2026-06-10",
+      "source": "기계공학부",
+      "context": "2026학년도 2학기 대학원 학위논문 일정 변경 안.. 학사과에서는 최근 엄격하고 내실있는 학위논문 심사를 위한 심.. 2026/06/10",
+      "is_new": true
+    },
+    {
+      "id": "4e66959e33bab5d8",
+      "title": "[장학] 2026학년도 2학기 농어촌희망재단 청년창업농장학생..",
+      "url": "https://home.knu.ac.kr/HOME/puad/sub.htm?nav_code=pua1623029519&mode=view&mv_data=aWR4PTM5MDMmc3RhcnRQYWdlPSZsaXN0Tm89JnRhYmxlPWV4X2Jic19kYXRhX3B1YWQmY29kZT05WHRUMG1nNUhMaTMmc2VhcmNoX2l0ZW09JnNlYXJjaF9vcmRlcj0mb3JkZXJfbGlzdD0mbGlzdF9zY2FsZT0mdmlld19sZXZlbD0mdmlld19jYXRlPSZ2aWV3X2NhdGUyPSZzaXRlX2NvZGU9cHVhZA==",
+      "date": "2026-06-10",
+      "source": "행정학부",
+      "context": "[장학] 2026학년도 2학기 농어촌희망재단 청년창업농장학생.. 2026학년도 2학기 한국농어촌희망재단 청년창업농 장학생을 아래와 같이 선발하오니 해당 학생들이 기간 내에 .. 2026/06/10",
+      "is_new": true
+    },
+    {
+      "id": "750f3cbcaea92298",
+      "title": "[학사] 2026학년도 학사력 변경 알림",
+      "url": "https://home.knu.ac.kr/HOME/puad/sub.htm?nav_code=pua1623029519&mode=view&mv_data=aWR4PTM5MDEmc3RhcnRQYWdlPSZsaXN0Tm89JnRhYmxlPWV4X2Jic19kYXRhX3B1YWQmY29kZT05WHRUMG1nNUhMaTMmc2VhcmNoX2l0ZW09JnNlYXJjaF9vcmRlcj0mb3JkZXJfbGlzdD0mbGlzdF9zY2FsZT0mdmlld19sZXZlbD0mdmlld19jYXRlPSZ2aWV3X2NhdGUyPSZzaXRlX2NvZGU9cHVhZA==",
+      "date": "2026-06-10",
+      "source": "행정학부",
+      "context": "[학사] 2026학년도 학사력 변경 알림 학사 업무의 원활한 추진을 위해, 2026학년도 학사력이 일부 변.. 2026/06/10",
+      "is_new": true
+    },
+    {
+      "id": "134ac45236f37e7d",
+      "title": "부산대학교 공동학위를 위한 2026학년도 2학기 학..",
+      "url": "https://home.knu.ac.kr/HOME/seeai/sub.htm?nav_code=see1667180581&mode=view&mv_data=aWR4PTIwOSZzdGFydFBhZ2U9Jmxpc3RObz0mdGFibGU9ZXhfYmJzX2RhdGFfc2VlYWkmY29kZT1WZWpOTERSa3JIb2cmc2VhcmNoX2l0ZW09JnNlYXJjaF9vcmRlcj0mb3JkZXJfbGlzdD0mbGlzdF9zY2FsZT0mdmlld19sZXZlbD0mdmlld19jYXRlPSZ2aWV3X2NhdGUyPSZzaXRlX2NvZGU9c2VlYWk=",
+      "date": "2026-06-09",
+      "source": "IT대학 전자공학부 인공지능전공",
+      "context": "부산대학교 공동학위를 위한 2026학년도 2학기 학.. 대상: 2026/2학기 기준 2학년 이상의 인공지능전공 학생기한: ~ 2026. .6. 15(화) 11:30﻿​------------------------------------------------------------------------------------------------------------------------------------------공동학위 참여 학과- 경북대학교: IT대학 전자공학부 인공지능전공- 부산대학교: 정보의.. 2026/06/09 +",
+      "is_new": false
+    },
+    {
+      "id": "8d367b227e5e6d37",
+      "title": "여름철 수상안전 대학생 안전사고 유의 및 안전관..",
+      "url": "https://home.knu.ac.kr/HOME/me/sub.htm?nav_code=me1623370438&mode=view&mv_data=aWR4PTY2MTYmc3RhcnRQYWdlPSZsaXN0Tm89JnRhYmxlPWV4X2Jic19kYXRhX21lJmNvZGU9MGJvY0hDRkhlNDNRJnNlYXJjaF9pdGVtPSZzZWFyY2hfb3JkZXI9Jm9yZGVyX2xpc3Q9Jmxpc3Rfc2NhbGU9JnZpZXdfbGV2ZWw9JnZpZXdfY2F0ZT0mdmlld19jYXRlMj0mc2l0ZV9jb2RlPW1l",
+      "date": "2026-06-09",
+      "source": "기계공학부",
+      "context": "여름철 수상안전 대학생 안전사고 유의 및 안전관.. [여름철 수상안전 대학생 안전사고 유의 및 안전관리 안내]1. 여.. 2026/06/09",
+      "is_new": true
+    },
+    {
+      "id": "8f345508f28be4f0",
+      "title": "2026학년도 2학기 복학 및 휴학 안내",
+      "url": "https://home.knu.ac.kr/HOME/me/sub.htm?nav_code=me1623370438&mode=view&mv_data=aWR4PTY2MTUmc3RhcnRQYWdlPSZsaXN0Tm89JnRhYmxlPWV4X2Jic19kYXRhX21lJmNvZGU9MGJvY0hDRkhlNDNRJnNlYXJjaF9pdGVtPSZzZWFyY2hfb3JkZXI9Jm9yZGVyX2xpc3Q9Jmxpc3Rfc2NhbGU9JnZpZXdfbGV2ZWw9JnZpZXdfY2F0ZT0mdmlld19jYXRlMj0mc2l0ZV9jb2RlPW1l",
+      "date": "2026-06-09",
+      "source": "기계공학부",
+      "context": "2026학년도 2학기 복학 및 휴학 안내 2026학년도 2학기 복학 및 휴학을 아래와 같이안내합니다.▢ 복 학 ◦ 신청 방법: 통합정보시스템(htt.. 2026/06/09",
+      "is_new": true
+    },
+    {
+      "id": "ca812a3f7b0faddf",
+      "title": "2026년 사이버 장애인식개선 교육 이수 안내",
+      "url": "https://home.knu.ac.kr/HOME/me/sub.htm?nav_code=me1623370438&mode=view&mv_data=aWR4PTY2MTMmc3RhcnRQYWdlPSZsaXN0Tm89JnRhYmxlPWV4X2Jic19kYXRhX21lJmNvZGU9MGJvY0hDRkhlNDNRJnNlYXJjaF9pdGVtPSZzZWFyY2hfb3JkZXI9Jm9yZGVyX2xpc3Q9Jmxpc3Rfc2NhbGU9JnZpZXdfbGV2ZWw9JnZpZXdfY2F0ZT0mdmlld19jYXRlMj0mc2l0ZV9jb2RlPW1l",
+      "date": "2026-06-09",
+      "source": "기계공학부",
+      "context": "2026년 사이버 장애인식개선 교육 이수 안내 1.장애학생지원센터에서장애인식개선 교육을 안내합니다.장애인.. 2026/06/09",
+      "is_new": true
+    },
+    {
+      "id": "334490fd115716a7",
+      "title": "LG CNS 2026년 상반기 AX/DX & RX 분야 신입사원 ..",
+      "url": "https://home.knu.ac.kr/HOME/me/sub.htm?nav_code=me1623370436&mode=view&mv_data=aWR4PTY2MTcmc3RhcnRQYWdlPSZsaXN0Tm89JnRhYmxlPWV4X2Jic19kYXRhX21lJmNvZGU9RDlpS3VSRE94cThjJnNlYXJjaF9pdGVtPSZzZWFyY2hfb3JkZXI9Jm9yZGVyX2xpc3Q9Jmxpc3Rfc2NhbGU9JnZpZXdfbGV2ZWw9JnZpZXdfY2F0ZT0mdmlld19jYXRlMj0mc2l0ZV9jb2RlPW1l",
+      "date": "2026-06-09",
+      "source": "기계공학부",
+      "context": "LG CNS 2026년 상반기 AX/DX & RX 분야 신입사원 .. [LG CNS 2026년 상반기 AX/DX& RX 분야 신입사원 채용 안내]■ 접수기간2026년 6월.. 2026/06/09",
+      "is_new": true
+    },
+    {
+      "id": "cdcd3328a157d83b",
+      "title": "2026년 사이버 장애인식개선 교육 이수 안내",
+      "url": "https://home.knu.ac.kr/HOME/me/sub.htm?nav_code=me1623639997&mode=view&mv_data=aWR4PTY2MTQmc3RhcnRQYWdlPSZsaXN0Tm89JnRhYmxlPWV4X2Jic19kYXRhX21lJmNvZGU9cGFjdnN2SXRwOG40JnNlYXJjaF9pdGVtPSZzZWFyY2hfb3JkZXI9Jm9yZGVyX2xpc3Q9Jmxpc3Rfc2NhbGU9JnZpZXdfbGV2ZWw9JnZpZXdfY2F0ZT0mdmlld19jYXRlMj0mc2l0ZV9jb2RlPW1l",
+      "date": "2026-06-09",
+      "source": "기계공학부",
+      "context": "2026년 사이버 장애인식개선 교육 이수 안내 1. 장애학생지원센터에서장애인식개선 교육을 안내합니다.장애인.. 2026/06/09",
+      "is_new": true
+    },
+    {
+      "id": "f845a7c88d662c60",
+      "title": "[학적] 2026학년도 2학기 복학 및 휴학 안내",
+      "url": "https://home.knu.ac.kr/HOME/puad/sub.htm?nav_code=pua1623029519&mode=view&mv_data=aWR4PTM5MDAmc3RhcnRQYWdlPSZsaXN0Tm89JnRhYmxlPWV4X2Jic19kYXRhX3B1YWQmY29kZT05WHRUMG1nNUhMaTMmc2VhcmNoX2l0ZW09JnNlYXJjaF9vcmRlcj0mb3JkZXJfbGlzdD0mbGlzdF9zY2FsZT0mdmlld19sZXZlbD0mdmlld19jYXRlPSZ2aWV3X2NhdGUyPSZzaXRlX2NvZGU9cHVhZA==",
+      "date": "2026-06-09",
+      "source": "행정학부",
+      "context": "[학적] 2026학년도 2학기 복학 및 휴학 안내 ▶ 행정학부 학적 담당자: 박지윤 조교, 053-950-3734, jiyun0901@knu.ac.kr2026.. 2026/06/09",
+      "is_new": true
+    },
+    {
+      "id": "ae443d9c997ac60d",
+      "title": "[졸업] (2026년 8월 졸업예정자 대상) 2026학년도..",
+      "url": "https://home.knu.ac.kr/HOME/puad/sub.htm?nav_code=pua1688976588&mode=view&mv_data=aWR4PTM4OTkmc3RhcnRQYWdlPSZsaXN0Tm89JnRhYmxlPWV4X2Jic19kYXRhX3B1YWQmY29kZT05Qk5FeUY0TmxuaTYmc2VhcmNoX2l0ZW09JnNlYXJjaF9vcmRlcj0mb3JkZXJfbGlzdD0mbGlzdF9zY2FsZT0mdmlld19sZXZlbD0mdmlld19jYXRlPSZ2aWV3X2NhdGUyPSZzaXRlX2NvZGU9cHVhZA==",
+      "date": "2026-06-09",
+      "source": "행정학부",
+      "context": "[졸업] (2026년 8월 졸업예정자 대상) 2026학년도.. ※ 행정학부생 문의 : 박지윤 조교, 053-950-3734, jiyun0901@kn.. 2026/06/09",
+      "is_new": true
+    },
+    {
+      "id": "d8c1da5273d83f99",
+      "title": "2026학년도 1학기 G-Link장학금 지원대상자 신청 ..",
+      "url": "https://home.knu.ac.kr/HOME/korean/sub.htm?nav_code=kor1697593848&mode=view&mv_data=aWR4PTEyMjImc3RhcnRQYWdlPSZsaXN0Tm89JnRhYmxlPWV4X2Jic19kYXRhX2tvcmVhbiZjb2RlPWZjMTVtYUJ3V2tDSSZzZWFyY2hfaXRlbT0mc2VhcmNoX29yZGVyPSZvcmRlcl9saXN0PSZsaXN0X3NjYWxlPSZ2aWV3X2xldmVsPSZ2aWV3X2NhdGU9JnZpZXdfY2F0ZTI9JnNpdGVfY29kZT1rb3JlYW4=",
+      "date": "2026-06-08",
+      "source": "국어국문학과",
+      "context": "2026학년도 1학기 G-Link장학금 지원대상자 신청 .. 2026학년도 1학기 G-Link장학금(학부생 학업지원 장학금)을 아래.. 2026/06/08",
+      "is_new": true
+    },
+    {
+      "id": "577bdb511c22ac6e",
+      "title": "안전하고 건강한 단톡방 활용을 위한 가이드라인",
+      "url": "https://home.knu.ac.kr/HOME/korean/sub.htm?nav_code=kor1697593823&mode=view&mv_data=aWR4PTEyMjEmc3RhcnRQYWdlPSZsaXN0Tm89JnRhYmxlPWV4X2Jic19kYXRhX2tvcmVhbiZjb2RlPUNtbmJqWnhqa0dpMyZzZWFyY2hfaXRlbT0mc2VhcmNoX29yZGVyPSZvcmRlcl9saXN0PSZsaXN0X3NjYWxlPSZ2aWV3X2xldmVsPSZ2aWV3X2NhdGU9JnZpZXdfY2F0ZTI9JnNpdGVfY29kZT1rb3JlYW4=",
+      "date": "2026-06-08",
+      "source": "국어국문학과",
+      "context": "안전하고 건강한 단톡방 활용을 위한 가이드라인 2026/06/08",
+      "is_new": true
+    },
+    {
+      "id": "f00f6c3ad09615e6",
+      "title": "[장학] 2026학년도 REB한국부동산원 장학생 추천 선발(~6/1..",
+      "url": "https://home.knu.ac.kr/HOME/puad/sub.htm?nav_code=pua1623029519&mode=view&mv_data=aWR4PTM4OTgmc3RhcnRQYWdlPSZsaXN0Tm89JnRhYmxlPWV4X2Jic19kYXRhX3B1YWQmY29kZT05WHRUMG1nNUhMaTMmc2VhcmNoX2l0ZW09JnNlYXJjaF9vcmRlcj0mb3JkZXJfbGlzdD0mbGlzdF9zY2FsZT0mdmlld19sZXZlbD0mdmlld19jYXRlPSZ2aWV3X2NhdGUyPSZzaXRlX2NvZGU9cHVhZA==",
+      "date": "2026-06-08",
+      "source": "행정학부",
+      "context": "[장학] 2026학년도 REB한국부동산원 장학생 추천 선발(~6/1.. ▶ 장학 담당자: 행정학부 박지윤 조교(053-950-3734, jiyun0901.. 2026/06/08",
+      "is_new": true
+    },
+    {
+      "id": "a5ebd8a418810247",
+      "title": "★★2026학년도 2학기 학·석사 및 학·석박사통..",
+      "url": "https://home.knu.ac.kr/HOME/korean/sub.htm?nav_code=kor1657071357&mode=view&mv_data=aWR4PTEyMTgmc3RhcnRQYWdlPSZsaXN0Tm89JnRhYmxlPWV4X2Jic19kYXRhX2tvcmVhbiZjb2RlPVpFZkhDaUJQbFJCciZzZWFyY2hfaXRlbT0mc2VhcmNoX29yZGVyPSZvcmRlcl9saXN0PSZsaXN0X3NjYWxlPSZ2aWV3X2xldmVsPSZ2aWV3X2NhdGU9JnZpZXdfY2F0ZTI9JnNpdGVfY29kZT1rb3JlYW4=",
+      "date": "2026-06-05",
+      "source": "국어국문학과",
+      "context": "★★2026학년도 2학기 학·석사 및 학·석박사통.. 2026학년도 2학기 학·석사 및 학·석박사통합연계과정 이수예정자 선발 계획을 다음과 같이 안내하오니 신청 .. 2026/06/05",
+      "is_new": true
+    },
+    {
+      "id": "0127c6c0fa4420d2",
+      "title": "2026학년도 1학기 강의평가 실시 안내",
+      "url": "https://home.knu.ac.kr/HOME/korean/sub.htm?nav_code=kor1657071357&mode=view&mv_data=aWR4PTEyMTcmc3RhcnRQYWdlPSZsaXN0Tm89JnRhYmxlPWV4X2Jic19kYXRhX2tvcmVhbiZjb2RlPVpFZkhDaUJQbFJCciZzZWFyY2hfaXRlbT0mc2VhcmNoX29yZGVyPSZvcmRlcl9saXN0PSZsaXN0X3NjYWxlPSZ2aWV3X2xldmVsPSZ2aWV3X2NhdGU9JnZpZXdfY2F0ZTI9JnNpdGVfY29kZT1rb3JlYW4=",
+      "date": "2026-06-05",
+      "source": "국어국문학과",
+      "context": "2026학년도 1학기 강의평가 실시 안내 2026학년도 1학기 강의평가를 다음과 같이 실시한다고 하오니, .. 2026/06/05",
+      "is_new": true
+    },
+    {
+      "id": "98f493b51067e549",
+      "title": "2026학년도 이공계국가우수장학생 선발자 신입생..",
+      "url": "https://home.knu.ac.kr/HOME/me/sub.htm?nav_code=me1623370438&mode=view&mv_data=aWR4PTY2MTImc3RhcnRQYWdlPSZsaXN0Tm89JnRhYmxlPWV4X2Jic19kYXRhX21lJmNvZGU9MGJvY0hDRkhlNDNRJnNlYXJjaF9pdGVtPSZzZWFyY2hfb3JkZXI9Jm9yZGVyX2xpc3Q9Jmxpc3Rfc2NhbGU9JnZpZXdfbGV2ZWw9JnZpZXdfY2F0ZT0mdmlld19jYXRlMj0mc2l0ZV9jb2RlPW1l",
+      "date": "2026-06-05",
+      "source": "기계공학부",
+      "context": "2026학년도 이공계국가우수장학생 선발자 신입생.. 기계공학부 2026006157 기계공학부 2026002869 기계공학.. 2026/06/05",
+      "is_new": true
+    },
+    {
+      "id": "e1d71e43e4a22f9e",
+      "title": "26.2 등록금 감면 우선선발대상자 장학금 신청 안..",
+      "url": "https://home.knu.ac.kr/HOME/me/sub.htm?nav_code=me1623370438&mode=view&mv_data=aWR4PTY2MTAmc3RhcnRQYWdlPSZsaXN0Tm89JnRhYmxlPWV4X2Jic19kYXRhX21lJmNvZGU9MGJvY0hDRkhlNDNRJnNlYXJjaF9pdGVtPSZzZWFyY2hfb3JkZXI9Jm9yZGVyX2xpc3Q9Jmxpc3Rfc2NhbGU9JnZpZXdfbGV2ZWw9JnZpZXdfY2F0ZT0mdmlld19jYXRlMj0mc2l0ZV9jb2RlPW1l",
+      "date": "2026-06-05",
+      "source": "기계공학부",
+      "context": "26.2 등록금 감면 우선선발대상자 장학금 신청 안.. 1. 신청대상1) 학부 재학생(복학예정자 포함) ① 교육지원대상자.. 2026/06/05",
+      "is_new": true
+    },
+    {
+      "id": "f6638079668e7499",
+      "title": "2026학년도 2학기 대학원 재학생 비전장학금(가계..",
+      "url": "https://home.knu.ac.kr/HOME/me/sub.htm?nav_code=me1623639997&mode=view&mv_data=aWR4PTY2MTEmc3RhcnRQYWdlPSZsaXN0Tm89JnRhYmxlPWV4X2Jic19kYXRhX21lJmNvZGU9cGFjdnN2SXRwOG40JnNlYXJjaF9pdGVtPSZzZWFyY2hfb3JkZXI9Jm9yZGVyX2xpc3Q9Jmxpc3Rfc2NhbGU9JnZpZXdfbGV2ZWw9JnZpZXdfY2F0ZT0mdmlld19jYXRlMj0mc2l0ZV9jb2RlPW1l",
+      "date": "2026-06-05",
+      "source": "기계공학부",
+      "context": "2026학년도 2학기 대학원 재학생 비전장학금(가계.. 2026학년도 2학기 대학원 재학생 비전장학금(가계곤란) 신청을 .. 2026/06/05",
+      "is_new": true
+    },
+    {
+      "id": "d1911c7d0313aebb",
+      "title": "2026학년도 1학기 강의평가 실시 안내",
+      "url": "https://home.knu.ac.kr/HOME/me/sub.htm?nav_code=me1623639997&mode=view&mv_data=aWR4PTY2MDYmc3RhcnRQYWdlPSZsaXN0Tm89JnRhYmxlPWV4X2Jic19kYXRhX21lJmNvZGU9cGFjdnN2SXRwOG40JnNlYXJjaF9pdGVtPSZzZWFyY2hfb3JkZXI9Jm9yZGVyX2xpc3Q9Jmxpc3Rfc2NhbGU9JnZpZXdfbGV2ZWw9JnZpZXdfY2F0ZT0mdmlld19jYXRlMj0mc2l0ZV9jb2RlPW1l",
+      "date": "2026-06-05",
+      "source": "기계공학부",
+      "context": "2026학년도 1학기 강의평가 실시 안내 2026학년도 1학기 강의평가를 아래와 같이 실시합니다.가. 강의.. 2026/06/05",
+      "is_new": true
+    },
+    {
+      "id": "2b9ab1e9170da84b",
+      "title": "[등록] 2026학년도 2학기 재학생 등록금 감면 우선선발대상..",
+      "url": "https://home.knu.ac.kr/HOME/puad/sub.htm?nav_code=pua1623029519&mode=view&mv_data=aWR4PTM4OTYmc3RhcnRQYWdlPSZsaXN0Tm89JnRhYmxlPWV4X2Jic19kYXRhX3B1YWQmY29kZT05WHRUMG1nNUhMaTMmc2VhcmNoX2l0ZW09JnNlYXJjaF9vcmRlcj0mb3JkZXJfbGlzdD0mbGlzdF9zY2FsZT0mdmlld19sZXZlbD0mdmlld19jYXRlPSZ2aWV3X2NhdGUyPSZzaXRlX2NvZGU9cHVhZA==",
+      "date": "2026-06-05",
+      "source": "행정학부",
+      "context": "[등록] 2026학년도 2학기 재학생 등록금 감면 우선선발대상.. 2026학년도 2학기 등록금 감면장학금 우선선발대상자 신청을 아.. 2026/06/05",
+      "is_new": true
+    },
+    {
+      "id": "3fb39725ff204121",
+      "title": "★2026학년도 2학기 복학 및 휴학 신청 안내",
+      "url": "https://home.knu.ac.kr/HOME/korean/sub.htm?nav_code=kor1657071357&mode=view&mv_data=aWR4PTEyMTYmc3RhcnRQYWdlPSZsaXN0Tm89JnRhYmxlPWV4X2Jic19kYXRhX2tvcmVhbiZjb2RlPVpFZkhDaUJQbFJCciZzZWFyY2hfaXRlbT0mc2VhcmNoX29yZGVyPSZvcmRlcl9saXN0PSZsaXN0X3NjYWxlPSZ2aWV3X2xldmVsPSZ2aWV3X2NhdGU9JnZpZXdfY2F0ZTI9JnNpdGVfY29kZT1rb3JlYW4=",
+      "date": "2026-06-04",
+      "source": "국어국문학과",
+      "context": "★2026학년도 2학기 복학 및 휴학 신청 안내 2026학년도 2학기 복학 및 휴학을 다음과 같이 안내하오니 학생들은 일정 확인하여 불이익 없기 바랍니다.가.. 2026/06/04",
+      "is_new": true
+    },
+    {
+      "id": "e2be238da6b37142",
+      "title": "[경북대 첨단기술원] [RISE 1-2] 연수연구원(인턴..",
+      "url": "https://home.knu.ac.kr/HOME/me/sub.htm?nav_code=me1623370436&mode=view&mv_data=aWR4PTY2MDMmc3RhcnRQYWdlPSZsaXN0Tm89JnRhYmxlPWV4X2Jic19kYXRhX21lJmNvZGU9RDlpS3VSRE94cThjJnNlYXJjaF9pdGVtPSZzZWFyY2hfb3JkZXI9Jm9yZGVyX2xpc3Q9Jmxpc3Rfc2NhbGU9JnZpZXdfbGV2ZWw9JnZpZXdfY2F0ZT0mdmlld19jYXRlMj0mc2l0ZV9jb2RlPW1l",
+      "date": "2026-06-02",
+      "source": "기계공학부",
+      "context": "[경북대 첨단기술원] [RISE 1-2] 연수연구원(인턴.. [경북대 첨단기술원] [RISE 1-2] 연수연구원(인턴) 모집공고1. 공 고 명: 2026년 경북대학교 .. 2026/06/02",
+      "is_new": true
+    },
+    {
+      "id": "c2cc2214c6912350",
+      "title": "(주)탑로보틱스 2026년 신입 및 경력 엔지니어 채..",
+      "url": "https://home.knu.ac.kr/HOME/me/sub.htm?nav_code=me1623370436&mode=view&mv_data=aWR4PTY1OTYmc3RhcnRQYWdlPSZsaXN0Tm89JnRhYmxlPWV4X2Jic19kYXRhX21lJmNvZGU9RDlpS3VSRE94cThjJnNlYXJjaF9pdGVtPSZzZWFyY2hfb3JkZXI9Jm9yZGVyX2xpc3Q9Jmxpc3Rfc2NhbGU9JnZpZXdfbGV2ZWw9JnZpZXdfY2F0ZT0mdmlld19jYXRlMj0mc2l0ZV9jb2RlPW1l",
+      "date": "2026-06-01",
+      "source": "기계공학부",
+      "context": "(주)탑로보틱스 2026년 신입 및 경력 엔지니어 채.. 인간의 한계를 넘어서는 휴머노이드 로봇 기술을 통해 세상을 변.. 2026/06/01",
+      "is_new": true
+    },
+    {
+      "id": "b79953b18240d0d6",
+      "title": "포항산업과학연구원 위촉 연구원 수시 채용",
+      "url": "https://home.knu.ac.kr/HOME/me/sub.htm?nav_code=me1623370436&mode=view&mv_data=aWR4PTY1OTUmc3RhcnRQYWdlPSZsaXN0Tm89JnRhYmxlPWV4X2Jic19kYXRhX21lJmNvZGU9RDlpS3VSRE94cThjJnNlYXJjaF9pdGVtPSZzZWFyY2hfb3JkZXI9Jm9yZGVyX2xpc3Q9Jmxpc3Rfc2NhbGU9JnZpZXdfbGV2ZWw9JnZpZXdfY2F0ZT0mdmlld19jYXRlMj0mc2l0ZV9jb2RlPW1l",
+      "date": "2026-06-01",
+      "source": "기계공학부",
+      "context": "포항산업과학연구원 위촉 연구원 수시 채용 ■ 2026년 상반기 위촉 연구원 수시채용 (알루미늄 용해)- 직종 .. 2026/06/01",
+      "is_new": true
+    },
+    {
+      "id": "c9fd74628d4d4774",
+      "title": "브이엠(주) 채용 안내",
+      "url": "https://home.knu.ac.kr/HOME/me/sub.htm?nav_code=me1623370436&mode=view&mv_data=aWR4PTY1OTQmc3RhcnRQYWdlPSZsaXN0Tm89JnRhYmxlPWV4X2Jic19kYXRhX21lJmNvZGU9RDlpS3VSRE94cThjJnNlYXJjaF9pdGVtPSZzZWFyY2hfb3JkZXI9Jm9yZGVyX2xpc3Q9Jmxpc3Rfc2NhbGU9JnZpZXdfbGV2ZWw9JnZpZXdfY2F0ZT0mdmlld19jYXRlMj0mc2l0ZV9jb2RlPW1l",
+      "date": "2026-05-29",
+      "source": "기계공학부",
+      "context": "브이엠(주) 채용 안내 국내유일 반도체 건식 식각 장비업체인 브이엠(주)에서는 채용을.. 2026/05/29",
+      "is_new": true
+    },
+    {
+      "id": "54c88bbeaff73073",
+      "title": "2026 [대구RISE사업] 청년연구자 지원사업 알림 ..",
+      "url": "https://home.knu.ac.kr/HOME/me/sub.htm?nav_code=me1623639997&mode=view&mv_data=aWR4PTY1OTImc3RhcnRQYWdlPSZsaXN0Tm89JnRhYmxlPWV4X2Jic19kYXRhX21lJmNvZGU9cGFjdnN2SXRwOG40JnNlYXJjaF9pdGVtPSZzZWFyY2hfb3JkZXI9Jm9yZGVyX2xpc3Q9Jmxpc3Rfc2NhbGU9JnZpZXdfbGV2ZWw9JnZpZXdfY2F0ZT0mdmlld19jYXRlMj0mc2l0ZV9jb2RlPW1l",
+      "date": "2026-05-29",
+      "source": "기계공학부",
+      "context": "2026 [대구RISE사업] 청년연구자 지원사업 알림 .. 2026 [대구RISE사업] 청년연구자 지원사업 계획과 신청방법에 대해 알려 드리오니, 대상자들은 많이 신.. 2026/05/29",
+      "is_new": true
+    },
+    {
+      "id": "3cba9296a2f6e0bf",
+      "title": "2026학년도 2학기 대학 재입학 선발 계획 안내",
+      "url": "https://home.knu.ac.kr/HOME/korean/sub.htm?nav_code=kor1657071357&mode=view&mv_data=aWR4PTEyMTMmc3RhcnRQYWdlPSZsaXN0Tm89JnRhYmxlPWV4X2Jic19kYXRhX2tvcmVhbiZjb2RlPVpFZkhDaUJQbFJCciZzZWFyY2hfaXRlbT0mc2VhcmNoX29yZGVyPSZvcmRlcl9saXN0PSZsaXN0X3NjYWxlPSZ2aWV3X2xldmVsPSZ2aWV3X2NhdGU9JnZpZXdfY2F0ZTI9JnNpdGVfY29kZT1rb3JlYW4=",
+      "date": "2026-05-28",
+      "source": "국어국문학과",
+      "context": "2026학년도 2학기 대학 재입학 선발 계획 안내 2026학년도 2학기 대학 재입학 선발계획을 다음과 같이 안내하오.. 2026/05/28",
+      "is_new": true
+    },
+    {
+      "id": "453054f190149355",
+      "title": "2026년 한국문화 지식그래프 구축 사업의 구축자..",
+      "url": "https://home.knu.ac.kr/HOME/korean/sub.htm?nav_code=kor1697593848&mode=view&mv_data=aWR4PTEyMTQmc3RhcnRQYWdlPSZsaXN0Tm89JnRhYmxlPWV4X2Jic19kYXRhX2tvcmVhbiZjb2RlPWZjMTVtYUJ3V2tDSSZzZWFyY2hfaXRlbT0mc2VhcmNoX29yZGVyPSZvcmRlcl9saXN0PSZsaXN0X3NjYWxlPSZ2aWV3X2xldmVsPSZ2aWV3X2NhdGU9JnZpZXdfY2F0ZTI9JnNpdGVfY29kZT1rb3JlYW4=",
+      "date": "2026-05-28",
+      "source": "국어국문학과",
+      "context": "2026년 한국문화 지식그래프 구축 사업의 구축자.. 2026년 한국문화 지식그래프 구축 사업의 구축자검수자를 다음과.. 2026/05/28",
+      "is_new": true
     }
-  ]
+  ],
+  "notices": []
 }
