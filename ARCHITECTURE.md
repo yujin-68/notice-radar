@@ -8,7 +8,7 @@
 - **핵심 수집/필터 로직**: `notice_radar.py`
 - **간단 웹 UI**: `web_app.py` (WSGI 서버)
 - **설정**: `config.json`
-- **출력**: `data/latest.json`, `data/previous.json`, `result.txt`
+- **출력**: `data/latest.json`, `result.txt`
 
 ## 2. 핵심 모듈: notice_radar.py
 
@@ -19,7 +19,7 @@
 - **`save_json(path, data)`**
   - 저장 경로 상위 폴더를 생성한 뒤 JSON 저장
 - **`write_result_text(path, filtered)`**
-  - 사람이 읽기 쉬운 텍스트 형식으로 결과를 출력 (`NEW` 태그 포함)
+  - 사람이 읽기 쉬운 텍스트 형식으로 결과를 출력
 
 ### 2.2 텍스트 정규화 및 날짜 추출
 
@@ -49,11 +49,10 @@
 
 ### 2.5 키워드 필터링
 
-- **`filter_notices(notices, keywords, source_filters, after, before, new_only)`**
+- **`filter_notices(notices, keywords, source_filters, after, before)`**
   - 제목 + 요약 문맥(`context`)을 합친 텍스트에서 키워드를 찾음
   - 출처 이름/URL에 포함된 문자열로 출처 필터링
   - `after` / `before` 날짜 범위 필터 적용
-  - `new_only`가 켜져 있으면 새 공지만 남김
   - 매칭된 키워드를 `matched_keywords`로 기록
 
 ### 2.6 HTML 수집
@@ -72,9 +71,8 @@
   3. 각 페이지에서 공지 링크/제목/날짜/요약 문맥 추출
   4. 모든 소스를 합친 뒤 URL 기준 중복 제거
   5. 날짜 기준 최신순 정렬 후 `limit`개만 `all_notices`에 유지
-  6. 이전 `latest.json`과 비교해 `is_new` 표시
-  7. 키워드/출처/기간/NEW 조건으로 `notices`를 추가 필터링
-  8. `latest.json`, `previous.json`, `result.txt` 저장
+  6. 키워드/출처/기간으로 `notices`를 추가 필터링
+  7. `latest.json`, `result.txt` 저장
   9. 요약 dict 반환
 
 ### 2.9 CLI 엔트리
@@ -94,7 +92,6 @@
 
 - **`render_page(data)`**
   - JSON 결과를 HTML 테이블로 렌더링
-  - `NEW` 태그 표시
   - 안전한 출력 위해 `html.escape` 사용
 
 ### 4.2 데이터 로딩
@@ -123,9 +120,8 @@
 4. 목록 블록에서 공지 링크/제목/날짜/요약 문맥 추출
 5. 전체 소스 합산 후 URL 중복 제거
 6. 최신순 정렬 후 최대 30개만 `all_notices`에 저장
-7. 이전 실행 결과와 비교해 `NEW` 표시
-8. 키워드/출처/기간/NEW 조건으로 `notices` 필터링
-9. 파일 저장 및 출력
+7. 키워드/출처/기간으로 `notices` 필터링
+8. 파일 저장 및 출력
 
 ## 6. 저장 파일 구조
 
@@ -133,8 +129,6 @@
   - 최신 실행 스냅샷
   - `all_notices`: 중복 제거 + 최신순 정렬 + limit 적용 결과
   - `notices`: 추가 필터가 적용된 결과
-- **`data/previous.json`**
-  - 직전 `latest.json`의 백업 (NEW 판단 기준)
 - **`result.txt`**
   - 사람이 읽기 쉬운 요약 결과
 
@@ -151,7 +145,6 @@
 
 - **키워드 매칭**: 제목 + 요약 문맥에 포함된 키워드가 하나라도 있으면 매칭(OR 조건)
 - **중복 제거**: URL 기준으로 dedup
-- **NEW 표시**: 이전 실행 결과와 비교하여 `id`가 새로 등장한 경우
 - **날짜 추출**: 링크 주변 블록 텍스트에서 정규식으로 탐색
 - **수집 범위**: 각 소스의 첫 목록 HTML만 수집하고, 다음 페이지는 따라가지 않음
 

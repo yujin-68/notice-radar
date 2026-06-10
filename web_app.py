@@ -4,7 +4,7 @@ import re
 from datetime import datetime, timedelta
 from html import escape
 from pathlib import Path
-from urllib.parse import parse_qs, urlencode, urlparse
+from urllib.parse import parse_qs, urlparse
 from wsgiref.simple_server import make_server
 
 from notice_radar import DEFAULT_CONFIG_PATH, DEFAULT_SOURCE_URL, collect_and_save, load_json
@@ -37,18 +37,16 @@ def parse_state(query: dict[str, list[str]]) -> dict:
     keywords = split_keywords(keyword_text) if keyword_text else []
     source = query.get("source", ["all"])[0]
     period = query.get("period", ["all"])[0]
-    new_only = query.get("new", ["all"])[0] == "only"
     return {
         "keyword_text": keyword_text,
         "keywords": keywords,
         "source": source,
         "period": period,
-        "new_only": new_only,
     }
 
 
 def apply_filters(data: dict, state: dict) -> dict:
-    if state["source"] == "all" and state["period"] == "all" and not state["new_only"] and not state["keywords"]:
+    if state["source"] == "all" and state["period"] == "all" and not state["keywords"]:
         return data
 
     after_date = period_to_after(state["period"])
@@ -67,8 +65,6 @@ def apply_filters(data: dict, state: dict) -> dict:
                 continue
         if after_date and notice.get("date") and notice["date"] < after_date.strftime("%Y-%m-%d"):
             continue
-        if state["new_only"] and not notice.get("is_new"):
-            continue
 
         item = dict(notice)
         item["matched_keywords"] = matched
@@ -80,7 +76,6 @@ def apply_filters(data: dict, state: dict) -> dict:
     derived["applied_filters"] = {
         "source": state["source"],
         "period": state["period"],
-        "new_only": state["new_only"],
     }
     derived["keywords"] = keyword_list
     return derived
@@ -105,7 +100,6 @@ def render_page(data: dict, state: dict, options: list[dict[str, str]]) -> str:
             f"<td>{escape(notice.get('date') or '-')}</td>"
             f"<td>{escape(notice.get('source', '-'))}</td>"
             f"<td><a href=\"{escape(notice.get('url', '#'), quote=True)}\" target=\"_blank\" rel=\"noreferrer\">{escape(notice.get('title', ''))}</a>"
-            f"{'<span class=\"tag\">NEW</span>' if notice.get('is_new') else ''}"
             f"{'<div class=\"excerpt\">' + escape((notice.get('context') or '')[:140]) + '</div>' if notice.get('context') else ''}</td>"
             f"<td>{escape(', '.join(notice.get('matched_keywords', [])))}</td>"
             "</tr>"
@@ -119,22 +113,12 @@ def render_page(data: dict, state: dict, options: list[dict[str, str]]) -> str:
         else "<div class='empty'>매칭된 공고가 없습니다.</div>"
     )
 
-    refresh_query = urlencode(
-        [
-            ("refresh", "1"),
-            ("keywords", state["keyword_text"]),
-            ("source", state["source"]),
-            ("period", state["period"]),
-            ("new", "only" if state["new_only"] else "all"),
-        ]
-    )
     source_label = next((option["label"] for option in options if option["value"] == state["source"]), state["source"])
     filter_text = " · ".join(
         part
         for part in [
             f"출처: {source_label}" if state["source"] != "all" else "",
             f"최근: {state['period']}" if state["period"] != "all" else "",
-            "NEW만 표시" if state["new_only"] else "",
         ]
         if part
     ) or "없음"
@@ -154,11 +138,6 @@ def render_page(data: dict, state: dict, options: list[dict[str, str]]) -> str:
         f'<option value="{value}"{" selected" if value == state["period"] else ""}>{label}</option>'
         for value, label in period_options.items()
     )
-    new_html = "".join(
-        f'<option value="{value}"{" selected" if ((value == "only") == state["new_only"]) else ""}>{label}</option>'
-        for value, label in [("all", "전체"), ("only", "NEW만")]
-    )
-
     return f"""<!doctype html>
 <html lang="ko">
 <head>
@@ -178,7 +157,6 @@ def render_page(data: dict, state: dict, options: list[dict[str, str]]) -> str:
     table {{ width: 100%; border-collapse: collapse; margin-top: 16px; }}
     th, td {{ border-bottom: 1px solid #ddd; text-align: left; padding: 10px 8px; vertical-align: top; }}
     th {{ background: #f5f5f5; }}
-    .tag {{ display: inline-block; background: #ffe08a; color: #5c4600; border-radius: 999px; padding: 2px 8px; font-size: 12px; margin-left: 6px; }}
     .excerpt {{ color: #666; font-size: 12px; margin-top: 6px; line-height: 1.4; }}
     .warning {{ margin: 12px 0; padding: 10px 12px; border-radius: 6px; background: #fff3cd; color: #6b5300; }}
     .empty {{ margin-top: 20px; color: #666; }}
@@ -204,10 +182,6 @@ def render_page(data: dict, state: dict, options: list[dict[str, str]]) -> str:
       <label>
         기간
         <select name="period">{period_html}</select>
-      </label>
-      <label>
-        NEW 표시
-        <select name="new">{new_html}</select>
       </label>
     </div>
     <div class="actions">

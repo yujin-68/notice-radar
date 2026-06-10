@@ -70,8 +70,7 @@ python main.py
 실행 결과:
 
 - `data/latest.json`: 현재 실행 결과
-- `data/previous.json`: 이전 실행 결과 백업
-- `result.txt`: 터미널 확인용 텍스트 결과 (`NEW` 포함)
+- `result.txt`: 터미널 확인용 텍스트 결과
 
 ### 웹페이지 실행
 
@@ -85,7 +84,7 @@ python web_app.py
 웹페이지 표시 기준:
 
 - 키워드는 텍스트 입력으로 받음
-- 출처/기간/NEW는 드롭다운으로 선택
+- 출처/기간은 드롭다운으로 선택
 - 제목+본문 기준으로 매칭
 
 ---
@@ -95,7 +94,7 @@ python web_app.py
 ```bash
 python main.py --keyword 해외 --keyword 학부연구생
 python main.py --source-url "https://home.knu.ac.kr/HOME/seeai/"
-python main.py --source "학부 공지" --after 2026-06-01 --new-only
+python main.py --source "학부 공지" --after 2026-06-01
 ```
 
 ---

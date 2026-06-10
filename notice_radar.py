@@ -102,7 +102,7 @@ def sort_notices_latest(notices: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return sorted(notices, key=lambda item: parse_notice_date(str(item.get("date", ""))) or datetime.min, reverse=True)
 
 
-def filter_notices(notices: list[dict[str, Any]], keywords: list[str], source_filters: list[str], after: str | None, before: str | None, new_only: bool) -> list[dict[str, Any]]:
+def filter_notices(notices: list[dict[str, Any]], keywords: list[str], source_filters: list[str], after: str | None, before: str | None) -> list[dict[str, Any]]:
     keyword_list = [keyword.strip() for keyword in keywords if keyword.strip()]
     source_terms = [source.strip().casefold() for source in source_filters if source.strip()]
     after_date = parse_notice_date(after or "")
@@ -123,9 +123,6 @@ def filter_notices(notices: list[dict[str, Any]], keywords: list[str], source_fi
             continue
         if before_date and (notice_date is None or notice_date > before_date):
             continue
-        if new_only and not notice.get("is_new"):
-            continue
-
         item = dict(notice)
         item["matched_keywords"] = matched
         filtered.append(item)
@@ -143,7 +140,7 @@ def write_result_text(path: Path, notices: list[dict[str, Any]], warnings: list[
         lines.append("매칭된 공지사항이 없습니다.")
     else:
         for idx, notice in enumerate(notices, 1):
-            lines.append(f"{idx}. {notice['title']}{' [NEW]' if notice.get('is_new') else ''}")
+            lines.append(f"{idx}. {notice['title']}")
             lines.append(f"   - 날짜: {notice.get('date') or '날짜 없음'}")
             lines.append(f"   - 출처: {notice.get('source', '-')}")
             lines.append(f"   - 키워드: {', '.join(notice.get('matched_keywords', []))}")
@@ -190,7 +187,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--source", action="append", default=None)
     parser.add_argument("--after")
     parser.add_argument("--before")
-    parser.add_argument("--new-only", action="store_true")
     parser.add_argument("--limit", type=int)
     return parser.parse_args()
 
@@ -205,7 +201,6 @@ def load_config(args: argparse.Namespace) -> dict[str, Any]:
         "source_filters": args.source or [],
         "after": args.after,
         "before": args.before,
-        "new_only": args.new_only,
         "limit": args.limit if args.limit is not None else int(config.get("limit", DEFAULT_LIMIT)),
         "storage_dir": Path(config.get("storage_dir", DEFAULT_STORAGE_DIR)),
         "result_path": Path(config.get("result_path", DEFAULT_RESULT_PATH)),
@@ -217,7 +212,6 @@ def load_config(args: argparse.Namespace) -> dict[str, Any]:
 def collect_and_save(config: dict[str, Any]) -> dict[str, Any]:
     storage_dir = Path(config["storage_dir"])
     latest_path = storage_dir / "latest.json"
-    previous_path = storage_dir / "previous.json"
     result_path = Path(config["result_path"])
 
     sources = config.get("sources", [{"name": "기본 소스", "url": DEFAULT_SOURCE_URL}])
@@ -231,12 +225,7 @@ def collect_and_save(config: dict[str, Any]) -> dict[str, Any]:
         except requests.RequestException as error:
             warnings.append(f"{source['name']}: {error}")
 
-    previous_data = load_json(latest_path) or {}
-    previous_ids = {item["id"] for item in previous_data.get("all_notices", previous_data.get("notices", []))}
-
     all_notices = sort_notices_latest({notice["url"]: notice for notice in notices}.values())[: max(int(config.get("limit", DEFAULT_LIMIT)), 0)]
-    for notice in all_notices:
-        notice["is_new"] = notice["id"] not in previous_ids
 
     filtered = sort_notices_latest(
         filter_notices(
@@ -245,12 +234,8 @@ def collect_and_save(config: dict[str, Any]) -> dict[str, Any]:
             config.get("source_filters", []),
             config.get("after"),
             config.get("before"),
-            config.get("new_only", False),
         )
     )
-
-    if previous_data:
-        save_json(previous_path, previous_data)
 
     updated_at = datetime.now().isoformat(timespec="seconds")
     summary = {
@@ -261,7 +246,6 @@ def collect_and_save(config: dict[str, Any]) -> dict[str, Any]:
             "source_filters": config.get("source_filters", []),
             "after_date": config.get("after"),
             "before_date": config.get("before"),
-            "new_only": config.get("new_only", False),
         },
         "total_notices": len(all_notices),
         "matched_notices": len(filtered),
@@ -269,7 +253,6 @@ def collect_and_save(config: dict[str, Any]) -> dict[str, Any]:
         "notices": filtered,
         "fetch_errors": warnings,
         "latest_path": str(latest_path),
-        "previous_path": str(previous_path),
         "result_path": str(result_path),
     }
 

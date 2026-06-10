@@ -32,6 +32,6 @@
   ],
   "_comment_limit": "최대 수집 건수",
   "limit": 30,
-  "_comment_storage_dir": "결과 저장 폴더 (latest.json, previous.json 저장)",
+  "_comment_storage_dir": "결과 저장 폴더 (latest.json 저장)",
   "storage_dir": "data"
 }
