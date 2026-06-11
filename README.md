@@ -107,3 +107,8 @@ python main.py --source "학부 공지" --after 2026-06-01
 4. 프로그램/스크립트: `python`
 5. 인수 추가: `main.py`
 6. 시작 위치: 프로젝트 루트 경로 (`C:\Project\notice-radar`)
+
+---
+
+## 배포 링크
+👉 [https://notice-radar.vercel.app/](https://notice-radar.vercel.app/)
